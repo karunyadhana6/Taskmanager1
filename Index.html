@@ -473,15 +473,21 @@
 
         function addTask() {
             const title = document.getElementById('taskTitle').value.trim();
-            const type = document.getElementById('taskType').value;
-            const priority = document.getElementById('taskPriority').value;
-            const dueDate = document.getElementById('taskDueDate').value;
-            const description = document.getElementById('taskDescription').value.trim();
-
+            // Add input validation
             if (!title) {
                 alert('Please enter a task title');
                 return;
             }
+
+            const dueDate = document.getElementById('taskDueDate').value;
+            if (dueDate && new Date(dueDate) < new Date().setHours(0,0,0,0)) {
+                alert('Due date cannot be in the past');
+                return;
+            }
+
+            const type = document.getElementById('taskType').value;
+            const priority = document.getElementById('taskPriority').value;
+            const description = document.getElementById('taskDescription').value.trim();
 
             const task = {
                 id: taskIdCounter++,
@@ -498,6 +504,7 @@
             clearForm();
             renderTasks();
             updateStats();
+            saveToLocalStorage();
         }
 
         function clearForm() {
@@ -514,6 +521,7 @@
                 task.completed = !task.completed;
                 renderTasks();
                 updateStats();
+                saveToLocalStorage();
             }
         }
 
@@ -522,6 +530,7 @@
                 tasks = tasks.filter(t => t.id !== id);
                 renderTasks();
                 updateStats();
+                saveToLocalStorage();
             }
         }
 
@@ -679,8 +688,27 @@
             document.getElementById('urgentTasks').textContent = urgent;
         }
 
+        // Local storage support
+        function saveToLocalStorage() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('taskIdCounter', taskIdCounter);
+        }
+
+        function loadFromLocalStorage() {
+            const savedTasks = localStorage.getItem('tasks');
+            const savedCounter = localStorage.getItem('taskIdCounter');
+            
+            if (savedTasks) {
+                tasks = JSON.parse(savedTasks);
+                taskIdCounter = parseInt(savedCounter) || 1;
+                renderTasks();
+                updateStats();
+            }
+        }
+
         // Initialize
         updateStats();
+        loadFromLocalStorage();
     </script>
 </body>
 </html>
