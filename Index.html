@@ -286,6 +286,15 @@
             background: #dc2626;
         }
 
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #2563eb;
+        }
+
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -609,6 +618,9 @@
                             ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
                         </div>
                         <div class="task-actions">
+                            <button class="btn-small btn-edit" onclick="editTask(${task.id})">
+                                Edit
+                            </button>
                             <button class="btn-small ${task.completed ? 'btn-incomplete' : 'btn-complete'}" 
                                     onclick="toggleTask(${task.id})">
                                 ${task.completed ? 'Mark Pending' : 'Complete'}
@@ -703,6 +715,24 @@
                 taskIdCounter = parseInt(savedCounter) || 1;
                 renderTasks();
                 updateStats();
+            }
+        }
+
+        function editTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                document.getElementById('taskTitle').value = task.title;
+                document.getElementById('taskType').value = task.type;
+                document.getElementById('taskPriority').value = task.priority;
+                document.getElementById('taskDueDate').value = task.dueDate;
+                document.getElementById('taskDescription').value = task.description;
+                
+                // Remove the old task
+                tasks = tasks.filter(t => t.id !== id);
+                
+                renderTasks();
+                updateStats();
+                saveToLocalStorage();
             }
         }
 
