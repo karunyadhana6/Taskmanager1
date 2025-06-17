@@ -13,7 +13,6 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
         }
@@ -341,6 +340,7 @@
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
+            color: var(--text-primary);
         }
 
         .close {
@@ -538,90 +538,47 @@
         }
 
         /* Theme Definitions */
-        :root {
-            /* Default Theme */
-            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --card-bg: white;
-            --text-primary: #333;
-            --text-secondary: #666;
-            --border-color: #e0e0e0;
-            --accent-color: #667eea;
-            --success-color: #4caf50;
-            --danger-color: #f44336;
-            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        body[data-theme="default"] {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
-        /* Dark Theme */
-        [data-theme="dark"] {
-            --bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #2d3436 100%);
-            --card-bg: #2d3436;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --border-color: #404040;
-            --accent-color: #00b894;
-            --success-color: #00b894;
-            --danger-color: #ff7675;
-            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        body[data-theme="dark"] {
+            background: linear-gradient(135deg, #1a1a1a 20%, #5e6a6e 100%);
+            color: #ffffff;
         }
 
-        /* Ocean Theme */
-        [data-theme="ocean"] {
-            --bg-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --card-bg: #ffffff;
-            --text-primary: #2d3436;
-            --text-secondary: #636e72;
-            --border-color: #dfe6e9;
-            --accent-color: #0984e3;
-            --success-color: #00cec9;
-            --danger-color: #ff7675;
-            --card-shadow: 0 4px 6px rgba(0, 158, 253, 0.1);
+        body[data-theme="ocean"] {
+            background: linear-gradient(135deg, #3f90d8 20%, #06659c 80%);
         }
 
-        /* Sunset Theme */
-        [data-theme="sunset"] {
-            --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-            --card-bg: #ffffff;
-            --text-primary: #2d3436;
-            --text-secondary: #636e72;
-            --border-color: #ffeaa7;
-            --accent-color: #e17055;
-            --success-color: #00b894;
-            --danger-color: #d63031;
-            --card-shadow: 0 4px 6px rgba(253, 121, 68, 0.1);
+        body[data-theme="sunset"] {
+            background: linear-gradient(135deg, #aa8b25 0%, #dd3a0d 100%);
         }
 
         /* Apply theme variables */
-        body {
-            background: var(--bg-gradient);
-            color: var(--text-primary);
+        [data-theme="default"] .tab-content {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
         }
 
-        .card, .modal-content, .dashboard-card, .chart-container {
-            background: var(--card-bg);
-            box-shadow: var(--card-shadow);
+        [data-theme="dark"] .tab-content {
+            background: rgba(45, 52, 54, 0.95);
+            color: #ffffff;
         }
 
-        .task-item, .note-item, .habit-item {
-            background: var(--card-bg);
-            border-color: var(--accent-color);
+        [data-theme="dark"] .task-item,
+        [data-theme="dark"] .note-item,
+        [data-theme="dark"] .habit-item,
+        [data-theme="dark"] .modal-content,
+        [data-theme="dark"] .dashboard-card {
+            background: #2d3436;
+            color: #ffffff;
         }
 
-        .form-input {
-            background: var(--card-bg);
-            color: var(--text-primary);
-            border-color: var(--border-color);
-        }
-
-        .btn-primary {
-            background: var(--accent-color);
-        }
-
-        .btn-success {
-            background: var(--success-color);
-        }
-
-        .btn-danger {
-            background: var(--danger-color);
+        [data-theme="dark"] .form-input {
+            background: #2d3436;
+            color: #ffffff;
+            border-color: #404040;
         }
     </style>
 </head>
@@ -1477,28 +1434,39 @@
 
         // Theme Management
         function initializeTheme() {
+            // Load saved theme or default
             const savedTheme = localStorage.getItem('selectedTheme') || 'default';
             applyTheme(savedTheme);
-            
+
+            // Add click handlers to theme options
             document.querySelectorAll('.theme-option').forEach(option => {
-                option.addEventListener('click', () => {
-                    const theme = option.getAttribute('data-theme');
+                option.addEventListener('click', function() {
+                    const theme = this.getAttribute('data-theme');
                     applyTheme(theme);
                     localStorage.setItem('selectedTheme', theme);
                 });
-                
-                if (option.getAttribute('data-theme') === savedTheme) {
-                    option.classList.add('active');
-                }
             });
         }
 
         function applyTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
+            // Apply theme to body
+            document.body.setAttribute('data-theme', theme);
+
+            // Update active state of theme options
             document.querySelectorAll('.theme-option').forEach(option => {
-                option.classList.toggle('active', option.getAttribute('data-theme') === theme);
+                if (option.getAttribute('data-theme') === theme) {
+                    option.classList.add('active');
+                } else {
+                    option.classList.remove('active');
+                }
             });
         }
+
+        // Add theme initialization to DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // ...existing initialization code...
+            initializeTheme();
+        });
     </script>
 </body>
 </html>
