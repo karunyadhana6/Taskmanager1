@@ -452,6 +452,62 @@
             margin-bottom: 8px;
             color: #666;
         }
+
+        .budget-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .expense-bar {
+            height: 25px;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe var(--percent), #f0f0f0 var(--percent));
+            border-radius: 12px;
+            margin: 8px 0;
+            position: relative;
+        }
+
+        .expense-label {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 0.9rem;
+            text-shadow: 0 0 2px rgba(0,0,0,0.5);
+        }
+
+        .expense-amount {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+        }
+
+        .budget-alert {
+            background: #ffe5e5;
+            border-left: 4px solid #ff4444;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        .budget-success {
+            background: #e5ffe5;
+            border-left: 4px solid #44ff44;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -498,10 +554,31 @@
         <div id="budget" class="tab-content">
             <div class="section-header">
                 <h2 class="section-title">Budget Tracker</h2>
-                <button class="btn btn-primary" id="addBudgetBtn">Add Transaction</button>
+                <div>
+                    <button class="btn btn-primary" onclick="openModal('budgetGoalModal')">Set Budget Goals</button>
+                    <button class="btn btn-primary" id="addBudgetBtn">Add Transaction</button>
+                </div>
             </div>
 
             <div class="budget-summary" id="budgetSummary"></div>
+            
+            <div class="budget-grid">
+                <div class="chart-container">
+                    <h3>Monthly Spending by Category</h3>
+                    <div id="categoryChart"></div>
+                </div>
+                <div class="chart-container">
+                    <h3>Budget Goals Progress</h3>
+                    <div id="budgetGoalsProgress"></div>
+                </div>
+            </div>
+
+            <div class="chart-container" style="margin-top: 20px;">
+                <h3>Spending Insights</h3>
+                <div id="spendingInsights"></div>
+            </div>
+
+            <h3 style="margin: 20px 0;">Recent Transactions</h3>
             <div id="transactionsList"></div>
         </div>
 
@@ -668,7 +745,19 @@
                     </select>
                 </div>
                 <div style="margin-bottom: 15px;">
-                    <input type="text" id="transactionCategory" class="form-input" placeholder="Category">
+                    <select id="transactionCategory" class="form-input" required>
+                        <option value="">Select Category</option>
+                        <option value="Housing">Housing</option>
+                        <option value="Transportation">Transportation</option>
+                        <option value="Food">Food & Dining</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Savings">Savings</option>
+                        <option value="Income">Income</option>
+                        <option value="Other">Other</option>
+                    </select>
                 </div>
                 <button type="submit" class="btn btn-primary">Add Transaction</button>
             </form>
@@ -713,6 +802,19 @@
         </div>
     </div>
 
+    <div id="budgetGoalModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal="budgetGoalModal">&times;</span>
+            <h3>Set Monthly Budget Goals</h3>
+            <form id="budgetGoalForm" onsubmit="setBudgetGoals(event)">
+                <div class="budget-categories">
+                    <!-- Will be populated dynamically -->
+                </div>
+                <button type="submit" class="btn btn-primary">Save Goals</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Data storage
         let appData = {
@@ -720,7 +822,17 @@
             transactions: [],
             notes: [],
             habits: [],
-            taskTemplates: []
+            taskTemplates: [],
+            budgetGoals: {
+                Housing: 1000,
+                Transportation: 300,
+                Food: 500,
+                Utilities: 200,
+                Healthcare: 200,
+                Entertainment: 150,
+                Shopping: 200,
+                Savings: 500
+            }
         };
 
         // Initialize app
@@ -1074,6 +1186,72 @@
             renderBudget();
         }
 
+        function setBudgetGoals(event) {
+            event.preventDefault();
+            const form = event.target;
+            const categories = ['Housing', 'Transportation', 'Food', 'Utilities', 
+                              'Healthcare', 'Entertainment', 'Shopping', 'Savings'];
+            
+            categories.forEach(category => {
+                const input = form.querySelector(`#goal_${category}`);
+                if (input) {
+                    appData.budgetGoals[category] = parseFloat(input.value) || 0;
+                }
+            });
+            
+            closeModal('budgetGoalModal');
+            renderBudget();
+        }
+
+        function getMonthlySpending() {
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            
+            return appData.transactions
+                .filter(t => new Date(t.date) >= firstDay && t.type === 'expense')
+                .reduce((acc, t) => {
+                    acc[t.category] = (acc[t.category] || 0) + Math.abs(t.amount);
+                    return acc;
+                }, {});
+        }
+
+        function generateSpendingInsights() {
+            const spending = getMonthlySpending();
+            const insights = [];
+            
+            Object.entries(spending).forEach(([category, amount]) => {
+                const goal = appData.budgetGoals[category];
+                if (goal) {
+                    const percentage = (amount / goal) * 100;
+                    if (percentage > 90) {
+                        insights.push(`
+                            <div class="budget-alert">
+                                ⚠️ You've spent ${percentage.toFixed(1)}% of your ${category} budget
+                            </div>
+                        `);
+                    }
+                }
+            });
+            
+            // Add savings recommendation
+            const totalIncome = appData.transactions
+                .filter(t => t.type === 'income')
+                .reduce((sum, t) => sum + t.amount, 0);
+            const totalExpenses = Object.values(spending).reduce((sum, amount) => sum + amount, 0);
+            const savingsRate = ((totalIncome - totalExpenses) / totalIncome) * 100;
+            
+            if (savingsRate < 20) {
+                insights.push(`
+                    <div class="budget-alert">
+                        💡 Your current savings rate is ${savingsRate.toFixed(1)}%. 
+                        Consider reducing expenses in non-essential categories to reach a 20% savings goal.
+                    </div>
+                `);
+            }
+            
+            return insights.join('');
+        }
+
         function renderBudget() {
             const totalIncome = appData.transactions
                 .filter(t => t.type === 'income')
@@ -1126,284 +1304,50 @@
                         </div>
                     `).join('');
             }
-        }
-
-        // Notes Management
-        function addNote(event) {
-            event.preventDefault();
             
-            const note = {
-                id: Date.now(),
-                title: document.getElementById('noteTitle').value,
-                content: document.getElementById('noteContent').value,
-                tags: document.getElementById('noteTags').value.split(',').map(tag => tag.trim()).filter(tag => tag),
-                createdDate: new Date().toISOString()
-            };
-            
-            appData.notes.push(note);
-            renderNotes();
-            closeModal('noteModal');
-        }
-
-        function deleteNote(id) {
-            appData.notes = appData.notes.filter(n => n.id !== id);
-            renderNotes();
-        }
-
-        function filterNotes() {
-            renderNotes();
-        }
-
-        function renderNotes() {
-            const searchTerm = document.getElementById('noteSearch')?.value.toLowerCase() || '';
-            
-            let filteredNotes = appData.notes.filter(note => {
-                return note.title.toLowerCase().includes(searchTerm) || 
-                       note.content.toLowerCase().includes(searchTerm) ||
-                       note.tags.some(tag => tag.toLowerCase().includes(searchTerm));
-            });
-            
-            const notesList = document.getElementById('notesList');
-            if (!notesList) return;
-            
-            notesList.innerHTML = filteredNotes.map(note => `
-                <div class="note-item">
-                    <div class="item-header">
-                        <div class="item-title">${note.title}</div>
-                        <div class="item-actions">
-                            <button class="btn btn-small btn-danger" onclick="deleteNote(${note.id})">Delete</button>
-                        </div>
-                    </div>
-                    <div class="note-content">${note.content}</div>
-                    <div style="margin-top: 10px; font-size: 0.9rem; color: #666;">
-                        ${note.tags.length > 0 ? `Tags: ${note.tags.join(', ')} | ` : ''}
-                        Created: ${new Date(note.createdDate).toLocaleDateString()}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Habits Management
-        function addHabit(event) {
-            event.preventDefault();
-            
-            const habit = {
-                id: Date.now(),
-                name: document.getElementById('habitName').value,
-                description: document.getElementById('habitDescription').value,
-                target: parseInt(document.getElementById('habitTarget').value),
-                completedToday: 0,
-                streak: 0,
-                lastCompleted: null,
-                createdDate: new Date().toISOString()
-            };
-            
-            appData.habits.push(habit);
-            renderHabits();
-            closeModal('habitModal');
-        }
-
-        function updateHabit(id, increment) {
-            const habit = appData.habits.find(h => h.id === id);
-            if (habit) {
-                const today = new Date().toDateString();
-                const lastCompletedDate = habit.lastCompleted ? new Date(habit.lastCompleted).toDateString() : null;
-                
-                if (increment > 0) {
-                    habit.completedToday = Math.min(habit.completedToday + increment, habit.target);
-                    
-                    if (habit.completedToday >= habit.target && lastCompletedDate !== today) {
-                        habit.streak++;
-                        habit.lastCompleted = new Date().toISOString();
-                    }
-                } else {
-                    habit.completedToday = Math.max(habit.completedToday + increment, 0);
-                }
-                
-                renderHabits();
-            }
-        }
-
-        function deleteHabit(id) {
-            appData.habits = appData.habits.filter(h => h.id !== id);
-            renderHabits();
-        }
-
-        function renderHabits() {
-            const habitsList = document.getElementById('habitsList');
-            if (!habitsList) return;
-            
-            habitsList.innerHTML = appData.habits.map(habit => {
-                const progress = (habit.completedToday / habit.target) * 100;
-                const isCompleted = habit.completedToday >= habit.target;
-                
-                return `
-                    <div class="habit-item">
-                        <div class="item-header">
-                            <div class="item-title">${habit.name} ${isCompleted ? '✅' : ''}</div>
-                            <div class="item-actions">
-                                <button class="btn btn-small btn-success" onclick="updateHabit(${habit.id}, 1)">+</button>
-                                <button class="btn btn-small btn-primary" onclick="updateHabit(${habit.id}, -1)">-</button>
-                                <button class="btn btn-small btn-danger" onclick="deleteHabit(${habit.id})">Delete</button>
+            // Render category spending chart
+            const categoryChart = document.getElementById('categoryChart');
+            if (categoryChart) {
+                const spending = getMonthlySpending();
+                const chartHtml = Object.entries(spending)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([category, amount]) => {
+                        const goal = appData.budgetGoals[category] || amount;
+                        const percentage = Math.min((amount / goal) * 100, 100);
+                        return `
+                            <div class="category-item">
+                                <div class="expense-bar" style="--percent: ${percentage}%">
+                                    <span class="expense-label">${category}</span>
+                                    <span class="expense-amount">$${amount.toFixed(2)} / $${goal}</span>
                             </div>
-                        </div>
-                        <div class="habit-description">${habit.description}</div>
-                        <div class="habit-progress">
-                            <div class="habit-progress-fill" style="width: ${progress}%"></div>
-                        </div>
-                        <div style="margin-top: 10px; font-size: 0.9rem; color: #666;">
-                            Progress: ${habit.completedToday}/${habit.target} | Streak: ${habit.streak} days
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Dashboard
-        function refreshDashboard() {
-            const totalTasks = appData.tasks.length;
-            const completedTasks = appData.tasks.filter(t => t.completed).length;
-            const totalNotes = appData.notes.length;
-            const activeHabits = appData.habits.length;
-            
-            const totalIncome = appData.transactions
-                .filter(t => t.type === 'income')
-                .reduce((sum, t) => sum + t.amount, 0);
-            
-            const totalExpenses = Math.abs(appData.transactions
-                .filter(t => t.type === 'expense')
-                .reduce((sum, t) => sum + t.amount, 0));
-            
-            const balance = totalIncome - totalExpenses;
-            
-            // Update stats
-            const stats = {
-                totalTasks: document.getElementById('totalTasks'),
-                completedTasks: document.getElementById('completedTasks'),
-                totalNotes: document.getElementById('totalNotes'),
-                activeHabits: document.getElementById('activeHabits'),
-                totalBalance: document.getElementById('totalBalance'),
-                monthlyIncome: document.getElementById('monthlyIncome')
-            };
-            
-            if (stats.totalTasks) stats.totalTasks.textContent = totalTasks
-            
-            
-            
-                        if (stats.completedTasks) stats.completedTasks.textContent = completedTasks;
-            if (stats.totalNotes) stats.totalNotes.textContent = totalNotes;
-            if (stats.activeHabits) stats.activeHabits.textContent = activeHabits;
-            if (stats.totalBalance) stats.totalBalance.textContent = `$${balance.toFixed(2)}`;
-            if (stats.monthlyIncome) stats.monthlyIncome.textContent = `$${totalIncome.toFixed(2)}`;
-            
-            // Update Upcoming Tasks
-            const upcomingTasks = document.getElementById('upcomingTasks');
-            if (upcomingTasks) {
-                const upcoming = [...appData.tasks]
-                    .filter(t => !t.completed && t.dueDate)
-                    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-                    .slice(0, 5);
-
-                upcomingTasks.innerHTML = upcoming.length ? upcoming.map(task => `
-                    <div class="dashboard-item">
-                        <div class="item-title">${task.title}</div>
-                        <div class="item-meta">
-                            Due: ${new Date(task.dueDate).toLocaleDateString()}
-                            <span class="priority-badge priority-${task.priority}">${task.priority}</span>
-                        </div>
-                    </div>
-                `).join('') : '<p class="empty-message">No upcoming tasks</p>';
-            }
-
-            // Update Recent Notes
-            const recentNotes = document.getElementById('recentNotes');
-            if (recentNotes) {
-                const recent = [...appData.notes]
-                    .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate))
-                    .slice(0, 3);
-
-                recentNotes.innerHTML = recent.map(note => `
-                    <div class="dashboard-item">
-                        <div class="item-title">${note.title}</div>
-                        <div class="item-meta">${note.content.substring(0, 100)}...</div>
-                    </div>
-                `).join('');
-            }
-
-            // Update Daily Progress
-            const dailyProgress = document.getElementById('dailyProgress');
-            if (dailyProgress) {
-                const completedToday = appData.tasks.filter(t => 
-                    t.completed && 
-                    new Date(t.completedDate).toDateString() === new Date().toDateString()
-                ).length;
-
-                const habitProgress = appData.habits.filter(h => 
-                    h.completedToday >= h.target
-                ).length;
-
-                dailyProgress.innerHTML = `
-                    <div class="progress-summary">
-                        <div>Tasks Completed Today: ${completedToday}</div>
-                        <div>Habits Completed: ${habitProgress}/${appData.habits.length}</div>
-                    </div>
-                `;
-            }
-
-            // Update task progress bar
-            const taskProgress = document.getElementById('taskProgress');
-            if (taskProgress) {
-                const completed = appData.tasks.filter(t => t.completed).length;
-                const total = appData.tasks.length;
-                const percentage = total ? (completed / total) * 100 : 0;
+                        `;
+                    }).join('');
                 
-                taskProgress.innerHTML = `
-                    <div class="stat-progress-fill" style="width: ${percentage}%"></div>
-                `;
+                categoryChart.innerHTML = chartHtml;
             }
-
-            const taskStats = {
-                total: appData.tasks.length,
-                completed: appData.tasks.filter(t => t.completed).length,
-                recurring: appData.tasks.filter(t => t.recurring).length,
-                onTime: appData.tasks.reduce((acc, t) => 
-                    acc + t.completionHistory.filter(h => h.onTime).length, 0
-                )
-            };
             
-            // Update task statistics in dashboard
-            const taskProgress = document.getElementById('taskProgress');
-            if (taskProgress) {
-                taskProgress.innerHTML = `
-                    <div class="stat-details">
-                        <div>Completed: ${taskStats.completed}/${taskStats.total}</div>
-                        <div>On-time Rate: ${((taskStats.onTime / taskStats.completed) * 100 || 0).toFixed(1)}%</div>
-                        <div>Recurring Tasks: ${taskStats.recurring}</div>
+            // Render spending insights
+            const spendingInsights = document.getElementById('spendingInsights');
+            if (spendingInsights) {
+                spendingInsights.innerHTML = generateSpendingInsights() || 
+                    '<div class="budget-success">👍 Your spending is within budget!</div>';
+            }
+            
+            // Render budget goals progress
+            const budgetGoalsProgress = document.getElementById('budgetGoalsProgress');
+            if (budgetGoalsProgress) {
+                const spending = getMonthlySpending();
+                const totalBudget = Object.values(appData.budgetGoals).reduce((sum, goal) => sum + goal, 0);
+                const totalSpent = Object.values(spending).reduce((sum, amount) => sum + amount, 0);
+                const percentage = (totalSpent / totalBudget) * 100;
+                
+                budgetGoalsProgress.innerHTML = `
+                    <div class="expense-bar" style="--percent: ${percentage}%">
+                        <span class="expense-label">Overall Budget</span>
+                        <span class="expense-amount">$${totalSpent.toFixed(2)} / $${totalBudget}</span>
                     </div>
-                    <div class="stat-progress-fill" style="width: ${(taskStats.completed / taskStats.total * 100) || 0}%"></div>
                 `;
             }
-        }
-
-        function getSmartPriority(task) {
-            const dueDate = new Date(task.dueDate);
-            const today = new Date();
-            const daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-            
-            // Check completion history of similar tasks
-            const similarTasks = appData.tasks.filter(t => 
-                t.category === task.category && 
-                t.completionHistory.length > 0
-            );
-            
-            const avgCompletionRate = similarTasks.reduce((acc, t) => {
-                const onTimeCompletions = t.completionHistory.filter(h => h.onTime).length;
-                return acc + (onTimeCompletions / t.completionHistory.length);
-            }, 0) / (similarTasks.length || 1);
-            
-            if (daysUntilDue <= 1 || avgCompletionRate < 0.3) return 'high';
-            if (daysUntilDue <= 3 || avgCompletionRate < 0.7) return 'medium';
-            return 'low';
         }
     </script>
 </body>
