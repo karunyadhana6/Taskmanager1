@@ -430,6 +430,28 @@
             background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
             transition: width 0.3s ease;
         }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            margin-right: 8px;
+        }
+
+        .task-meta {
+            margin-top: 5px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .stat-details {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -606,6 +628,23 @@
                 <div style="margin-bottom: 15px;">
                     <input type="date" id="taskDueDate" class="form-input">
                 </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="taskRecurring">Recurring Task</label>
+                    <select id="taskRecurring" class="form-input" onchange="toggleRecurringOptions()">
+                        <option value="">No</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+                <div id="recurringOptions" style="display: none; margin-bottom: 15px;">
+                    <label for="taskEndDate">End Date (optional)</label>
+                    <input type="date" id="taskEndDate" class="form-input">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="taskTemplate">Save as Template</label>
+                    <input type="checkbox" id="taskTemplate">
+                </div>
                 <button type="submit" class="btn btn-primary">Add Task</button>
             </form>
         </div>
@@ -680,7 +719,8 @@
             tasks: [],
             transactions: [],
             notes: [],
-            habits: []
+            habits: [],
+            taskTemplates: []
         };
 
         // Initialize app
@@ -749,7 +789,11 @@
                     priority: 'high',
                     completed: false,
                     dueDate: '2025-06-20',
-                    createdDate: new Date().toISOString()
+                    createdDate: new Date().toISOString(),
+                    recurring: '',
+                    endDate: null,
+                    completionHistory: [],
+                    category: 'work'
                 },
                 {
                     id: 2,
@@ -758,7 +802,22 @@
                     priority: 'medium',
                     completed: true,
                     dueDate: '2025-06-18',
-                    createdDate: new Date().toISOString()
+                    createdDate: new Date().toISOString(),
+                    recurring: 'weekly',
+                    endDate: null,
+                    completionHistory: [],
+                    category: 'personal'
+                }
+            ];
+
+            appData.taskTemplates = [
+                {
+                    id: 1,
+                    title: 'Weekly Review',
+                    description: 'Review weekly progress and plan next week',
+                    priority: 'medium',
+                    category: 'work',
+                    recurring: 'weekly'
                 }
             ];
 
@@ -844,6 +903,12 @@
         }
 
         // Task Management
+        function toggleRecurringOptions() {
+            const recurringSelect = document.getElementById('taskRecurring');
+            const recurringOptions = document.getElementById('recurringOptions');
+            recurringOptions.style.display = recurringSelect.value ? 'block' : 'none';
+        }
+
         function addTask(event) {
             event.preventDefault();
             
@@ -854,19 +919,75 @@
                 priority: document.getElementById('taskPriority').value,
                 completed: false,
                 dueDate: document.getElementById('taskDueDate').value,
-                createdDate: new Date().toISOString()
+                createdDate: new Date().toISOString(),
+                recurring: document.getElementById('taskRecurring').value,
+                endDate: document.getElementById('taskEndDate').value || null,
+                completionHistory: [],
+                category: document.getElementById('taskType').value
             };
             
+            // Save as template if checked
+            if (document.getElementById('taskTemplate').checked) {
+                const template = {...task};
+                delete template.id;
+                delete template.completed;
+                delete template.createdDate;
+                delete template.completionHistory;
+                appData.taskTemplates.push({...template, id: Date.now()});
+            }
+            
             appData.tasks.push(task);
+            if (task.recurring) {
+                scheduleNextRecurrence(task);
+            }
+            
             renderTasks();
             closeModal('taskModal');
+        }
+
+        function scheduleNextRecurrence(task) {
+            const nextDate = calculateNextDueDate(task.dueDate, task.recurring);
+            if (!task.endDate || new Date(nextDate) <= new Date(task.endDate)) {
+                const newTask = {
+                    ...task,
+                    id: Date.now(),
+                    dueDate: nextDate,
+                    completed: false
+                };
+                appData.tasks.push(newTask);
+            }
+        }
+
+        function calculateNextDueDate(currentDate, recurring) {
+            const date = new Date(currentDate);
+            switch (recurring) {
+                case 'daily':
+                    date.setDate(date.getDate() + 1);
+                    break;
+                case 'weekly':
+                    date.setDate(date.getDate() + 7);
+                    break;
+                case 'monthly':
+                    date.setMonth(date.getMonth() + 1);
+                    break;
+            }
+            return date.toISOString().split('T')[0];
         }
 
         function toggleTask(id) {
             const task = appData.tasks.find(t => t.id === id);
             if (task) {
                 task.completed = !task.completed;
+                if (task.completed) {
+                    task.completionHistory.push({
+                        completedAt: new Date().toISOString(),
+                        onTime: new Date(task.dueDate) >= new Date()
+                    });
+                }
                 renderTasks();
+                if (task.completed && task.recurring) {
+                    scheduleNextRecurrence(task);
+                }
             }
         }
 
@@ -901,7 +1022,17 @@
             tasksList.innerHTML = filteredTasks.map(task => `
                 <div class="task-item ${task.completed ? 'completed' : ''} priority-${task.priority}">
                     <div class="item-header">
-                        <div class="item-title task-title">${task.title}</div>
+                        <div>
+                            <div class="item-title task-title">${task.title}</div>
+                            <div class="task-meta">
+                                ${task.recurring ? `<span class="badge">🔄 ${task.recurring}</span>` : ''}
+                                <span class="badge">📂 ${task.category}</span>
+                                ${!task.recurring && !task.completed ? 
+                                    `<span class="badge">💡 Suggested Priority: ${getSmartPriority(task)}</span>` 
+                                    : ''
+                                }
+                            </div>
+                        </div>
                         <div class="item-actions">
                             <button class="btn btn-small ${task.completed ? 'btn-primary' : 'btn-success'}" 
                                     onclick="toggleTask(${task.id})">
@@ -1230,6 +1361,49 @@
                     <div class="stat-progress-fill" style="width: ${percentage}%"></div>
                 `;
             }
+
+            const taskStats = {
+                total: appData.tasks.length,
+                completed: appData.tasks.filter(t => t.completed).length,
+                recurring: appData.tasks.filter(t => t.recurring).length,
+                onTime: appData.tasks.reduce((acc, t) => 
+                    acc + t.completionHistory.filter(h => h.onTime).length, 0
+                )
+            };
+            
+            // Update task statistics in dashboard
+            const taskProgress = document.getElementById('taskProgress');
+            if (taskProgress) {
+                taskProgress.innerHTML = `
+                    <div class="stat-details">
+                        <div>Completed: ${taskStats.completed}/${taskStats.total}</div>
+                        <div>On-time Rate: ${((taskStats.onTime / taskStats.completed) * 100 || 0).toFixed(1)}%</div>
+                        <div>Recurring Tasks: ${taskStats.recurring}</div>
+                    </div>
+                    <div class="stat-progress-fill" style="width: ${(taskStats.completed / taskStats.total * 100) || 0}%"></div>
+                `;
+            }
+        }
+
+        function getSmartPriority(task) {
+            const dueDate = new Date(task.dueDate);
+            const today = new Date();
+            const daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+            
+            // Check completion history of similar tasks
+            const similarTasks = appData.tasks.filter(t => 
+                t.category === task.category && 
+                t.completionHistory.length > 0
+            );
+            
+            const avgCompletionRate = similarTasks.reduce((acc, t) => {
+                const onTimeCompletions = t.completionHistory.filter(h => h.onTime).length;
+                return acc + (onTimeCompletions / t.completionHistory.length);
+            }, 0) / (similarTasks.length || 1);
+            
+            if (daysUntilDue <= 1 || avgCompletionRate < 0.3) return 'high';
+            if (daysUntilDue <= 3 || avgCompletionRate < 0.7) return 'medium';
+            return 'low';
         }
     </script>
 </body>
