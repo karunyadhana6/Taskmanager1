@@ -347,6 +347,38 @@
             opacity: 0.9;
         }
 
+        /* Loading overlay styles */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
@@ -472,6 +504,11 @@
         </div>
     </div>
 
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
     <script>
         // In-memory storage (replace with localStorage in your own environment)
         let tasks = [];
@@ -481,6 +518,7 @@
         const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 };
 
         function addTask() {
+            showLoading();
             const title = document.getElementById('taskTitle').value.trim();
             // Add input validation
             if (!title) {
@@ -514,6 +552,7 @@
             renderTasks();
             updateStats();
             saveToLocalStorage();
+            setTimeout(hideLoading, 500); // Add small delay to show animation
         }
 
         function clearForm() {
@@ -525,6 +564,7 @@
         }
 
         function toggleTask(id) {
+            showLoading();
             const task = tasks.find(t => t.id === id);
             if (task) {
                 task.completed = !task.completed;
@@ -532,14 +572,17 @@
                 updateStats();
                 saveToLocalStorage();
             }
+            setTimeout(hideLoading, 500);
         }
 
         function deleteTask(id) {
             if (confirm('Are you sure you want to delete this task?')) {
+                showLoading();
                 tasks = tasks.filter(t => t.id !== id);
                 renderTasks();
                 updateStats();
                 saveToLocalStorage();
+                setTimeout(hideLoading, 500);
             }
         }
 
@@ -719,6 +762,7 @@
         }
 
         function editTask(id) {
+            showLoading();
             const task = tasks.find(t => t.id === id);
             if (task) {
                 document.getElementById('taskTitle').value = task.title;
@@ -734,6 +778,16 @@
                 updateStats();
                 saveToLocalStorage();
             }
+            setTimeout(hideLoading, 500);
+        }
+
+        // Loading management functions
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
         }
 
         // Initialize
