@@ -371,6 +371,65 @@
                 flex-direction: column;
             }
         }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-card h3 {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dashboard-content {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-trend {
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .stat-progress {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .stat-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            transition: width 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -452,44 +511,74 @@
         <div id="dashboard" class="tab-content">
             <div class="section-header">
                 <h2 class="section-title">Dashboard Overview</h2>
-                <button class="btn btn-primary" onclick="refreshDashboard()">Refresh</button>
+                <button class="btn btn-primary" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
             </div>
 
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="btn btn-primary" onclick="openModal('taskModal')">
+                    <i class="fas fa-plus"></i> New Task
+                </button>
+                <button class="btn btn-primary" onclick="openModal('noteModal')">
+                    <i class="fas fa-sticky-note"></i> New Note
+                </button>
+                <button class="btn btn-primary" onclick="openModal('budgetModal')">
+                    <i class="fas fa-money-bill"></i> New Transaction
+                </button>
+            </div>
+
+            <!-- Stats Grid -->
             <div class="stats-grid">
                 <div class="stat-card">
+                    <div class="stat-icon">📋</div>
                     <div class="stat-number" id="totalTasks">0</div>
-                    <div>Total Tasks</div>
+                    <div class="stat-label">Total Tasks</div>
+                    <div class="stat-progress" id="taskProgress"></div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="completedTasks">0</div>
-                    <div>Completed</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="totalNotes">0</div>
-                    <div>Notes</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="activeHabits">0</div>
-                    <div>Active Habits</div>
-                </div>
-                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
                     <div class="stat-number" id="totalBalance">$0</div>
-                    <div>Balance</div>
+                    <div class="stat-label">Balance</div>
+                    <div class="stat-trend" id="balanceTrend"></div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="monthlyIncome">$0</div>
-                    <div>Monthly Income</div>
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-number" id="totalNotes">0</div>
+                    <div class="stat-label">Notes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-number" id="habitStreak">0</div>
+                    <div class="stat-label">Longest Streak</div>
                 </div>
             </div>
 
-            <div class="grid grid-2" style="margin-top: 30px;">
-                <div class="card">
-                    <h3>Recent Tasks</h3>
-                    <div id="recentTasks"></div>
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Upcoming Tasks -->
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-calendar"></i> Upcoming Tasks</h3>
+                    <div id="upcomingTasks" class="dashboard-content"></div>
                 </div>
-                <div class="card">
-                    <h3>Recent Transactions</h3>
-                    <div id="recentTransactions"></div>
+
+                <!-- Recent Transactions -->
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-money-bill-wave"></i> Recent Transactions</h3>
+                    <div id="recentTransactions" class="dashboard-content"></div>
+                </div>
+
+                <!-- Recent Notes -->
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-sticky-note"></i> Recent Notes</h3>
+                    <div id="recentNotes" class="dashboard-content"></div>
+                </div>
+
+                <!-- Daily Progress -->
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-chart-line"></i> Daily Progress</h3>
+                    <div id="dailyProgress" class="dashboard-content"></div>
                 </div>
             </div>
         </div>
@@ -1076,79 +1165,72 @@
             if (stats.totalBalance) stats.totalBalance.textContent = `$${balance.toFixed(2)}`;
             if (stats.monthlyIncome) stats.monthlyIncome.textContent = `$${totalIncome.toFixed(2)}`;
             
-            // Update recent tasks
-            const recentTasks = document.getElementById('recentTasks');
-            if (recentTasks) {
-                const recent = [...appData.tasks]
+            // Update Upcoming Tasks
+            const upcomingTasks = document.getElementById('upcomingTasks');
+            if (upcomingTasks) {
+                const upcoming = [...appData.tasks]
+                    .filter(t => !t.completed && t.dueDate)
+                    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+                    .slice(0, 5);
+
+                upcomingTasks.innerHTML = upcoming.length ? upcoming.map(task => `
+                    <div class="dashboard-item">
+                        <div class="item-title">${task.title}</div>
+                        <div class="item-meta">
+                            Due: ${new Date(task.dueDate).toLocaleDateString()}
+                            <span class="priority-badge priority-${task.priority}">${task.priority}</span>
+                        </div>
+                    </div>
+                `).join('') : '<p class="empty-message">No upcoming tasks</p>';
+            }
+
+            // Update Recent Notes
+            const recentNotes = document.getElementById('recentNotes');
+            if (recentNotes) {
+                const recent = [...appData.notes]
                     .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate))
-                    .slice(0, 5);
-                
-                recentTasks.innerHTML = recent.map(task => `
-                    <div class="task-item ${task.completed ? 'completed' : ''}" style="margin-bottom: 10px;">
-                        <div class="item-header">
-                            <div class="item-title task-title">${task.title}</div>
-                            <div class="item-actions">
-                                <button class="btn btn-small ${task.completed ? 'btn-primary' : 'btn-success'}" 
-                                        onclick="toggleTask(${task.id})">
-                                    ${task.completed ? 'Undo' : 'Complete'}
-                                </button>
-                            </div>
-                        </div>
-                        <div style="font-size: 0.9rem; color: #666;">
-                            ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} priority
-                            ${task.dueDate ? ` | Due: ${new Date(task.dueDate).toLocaleDateString()}` : ''}
-                        </div>
+                    .slice(0, 3);
+
+                recentNotes.innerHTML = recent.map(note => `
+                    <div class="dashboard-item">
+                        <div class="item-title">${note.title}</div>
+                        <div class="item-meta">${note.content.substring(0, 100)}...</div>
                     </div>
                 `).join('');
             }
-            
-            // Update recent transactions
-            const recentTransactions = document.getElementById('recentTransactions');
-            if (recentTransactions) {
-                const recent = [...appData.transactions]
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .slice(0, 5);
-                
-                recentTransactions.innerHTML = recent.map(trans => `
-                    <div class="transaction-item transaction-${trans.type}" style="margin-bottom: 10px;">
-                        <div class="item-header">
-                            <div class="item-title">${trans.description}</div>
-                            <div style="font-weight: bold; color: ${trans.amount > 0 ? '#4caf50' : '#f44336'}">
-                                ${trans.amount > 0 ? '+' : ''}$${Math.abs(trans.amount).toFixed(2)}
-                            </div>
-                        </div>
-                        <div style="font-size: 0.9rem; color: #666;">
-                            ${trans.category} | ${new Date(trans.date).toLocaleDateString()}
-                        </div>
+
+            // Update Daily Progress
+            const dailyProgress = document.getElementById('dailyProgress');
+            if (dailyProgress) {
+                const completedToday = appData.tasks.filter(t => 
+                    t.completed && 
+                    new Date(t.completedDate).toDateString() === new Date().toDateString()
+                ).length;
+
+                const habitProgress = appData.habits.filter(h => 
+                    h.completedToday >= h.target
+                ).length;
+
+                dailyProgress.innerHTML = `
+                    <div class="progress-summary">
+                        <div>Tasks Completed Today: ${completedToday}</div>
+                        <div>Habits Completed: ${habitProgress}/${appData.habits.length}</div>
                     </div>
-                `).join('');
+                `;
+            }
+
+            // Update task progress bar
+            const taskProgress = document.getElementById('taskProgress');
+            if (taskProgress) {
+                const completed = appData.tasks.filter(t => t.completed).length;
+                const total = appData.tasks.length;
+                const percentage = total ? (completed / total) * 100 : 0;
+                
+                taskProgress.innerHTML = `
+                    <div class="stat-progress-fill" style="width: ${percentage}%"></div>
+                `;
             }
         }
-
-        // Utility function to save data to localStorage
-        function saveData() {
-            localStorage.setItem('personalAssistantData', JSON.stringify(appData));
-        }
-
-        // Utility function to load data from localStorage
-        function loadData() {
-            const savedData = localStorage.getItem('personalAssistantData');
-            if (savedData) {
-                appData = JSON.parse(savedData);
-                renderTasks();
-                renderBudget();
-                renderNotes();
-                renderHabits();
-                refreshDashboard();
-            }
-        }
-
-        // Initialize by loading saved data
-        loadData();
-
-        // Save data periodically and before unload
-        setInterval(saveData, 30000); // Save every 30 seconds
-        window.addEventListener('beforeunload', saveData);
     </script>
 </body>
 </html>
