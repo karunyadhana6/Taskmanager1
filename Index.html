@@ -508,6 +508,121 @@
             margin: 10px 0;
             border-radius: 4px;
         }
+
+        /* Theme Switcher Styles */
+        .theme-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .theme-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .theme-option.active {
+            border-color: white;
+            transform: scale(1.1);
+        }
+
+        /* Theme Definitions */
+        :root {
+            /* Default Theme */
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: white;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --border-color: #e0e0e0;
+            --accent-color: #667eea;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dark Theme */
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #2d3436 100%);
+            --card-bg: #2d3436;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-color: #404040;
+            --accent-color: #00b894;
+            --success-color: #00b894;
+            --danger-color: #ff7675;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Ocean Theme */
+        [data-theme="ocean"] {
+            --bg-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --card-bg: #ffffff;
+            --text-primary: #2d3436;
+            --text-secondary: #636e72;
+            --border-color: #dfe6e9;
+            --accent-color: #0984e3;
+            --success-color: #00cec9;
+            --danger-color: #ff7675;
+            --card-shadow: 0 4px 6px rgba(0, 158, 253, 0.1);
+        }
+
+        /* Sunset Theme */
+        [data-theme="sunset"] {
+            --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            --card-bg: #ffffff;
+            --text-primary: #2d3436;
+            --text-secondary: #636e72;
+            --border-color: #ffeaa7;
+            --accent-color: #e17055;
+            --success-color: #00b894;
+            --danger-color: #d63031;
+            --card-shadow: 0 4px 6px rgba(253, 121, 68, 0.1);
+        }
+
+        /* Apply theme variables */
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+        }
+
+        .card, .modal-content, .dashboard-card, .chart-container {
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
+        }
+
+        .task-item, .note-item, .habit-item {
+            background: var(--card-bg);
+            border-color: var(--accent-color);
+        }
+
+        .form-input {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+        }
     </style>
 </head>
 <body>
@@ -815,6 +930,13 @@
         </div>
     </div>
 
+    <div class="theme-switcher">
+        <div class="theme-option" data-theme="default" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+        <div class="theme-option" data-theme="dark" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d3436 100%);"></div>
+        <div class="theme-option" data-theme="ocean" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+        <div class="theme-option" data-theme="sunset" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);"></div>
+    </div>
+
     <script>
         // Data storage
         let appData = {
@@ -889,6 +1011,9 @@
             renderNotes();
             renderHabits();
             refreshDashboard();
+
+            // Initialize theme
+            initializeTheme();
         });
 
         // Load some sample data
@@ -1348,6 +1473,31 @@
                     </div>
                 `;
             }
+        }
+
+        // Theme Management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('selectedTheme') || 'default';
+            applyTheme(savedTheme);
+            
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const theme = option.getAttribute('data-theme');
+                    applyTheme(theme);
+                    localStorage.setItem('selectedTheme', theme);
+                });
+                
+                if (option.getAttribute('data-theme') === savedTheme) {
+                    option.classList.add('active');
+                }
+            });
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.toggle('active', option.getAttribute('data-theme') === theme);
+            });
         }
     </script>
 </body>
