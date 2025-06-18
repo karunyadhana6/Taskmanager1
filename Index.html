@@ -465,6 +465,23 @@
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-container canvas {
+            flex: 1;
+            max-height: 250px !important;
+            margin: 10px 0 !important;
+        }
+
+        .chart-legend {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
         }
 
         .expense-bar {
@@ -556,25 +573,25 @@
         body[data-theme="dark"] {
             --bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #2d3436 100%);
             --text-color: #ffffff;
-            --card-bg: #2d3436;
-            --border-color: #404040;
-            --secondary-text: #b0b0b0;
+            --card-bg: #ffffff;
+            --border-color: #ffffff;
+            --secondary-text: #ffffff;
         }
 
         body[data-theme="ocean"] {
             --bg-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --text-color: #ffffff;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --border-color: #2980b9;
-            --secondary-text: #e0e0e0;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --secondary-text: #666;
         }
 
         body[data-theme="sunset"] {
             --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-            --text-color: #ffffff;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --border-color: #d35400;
-            --secondary-text: #ffe0d0;
+            --text-color: #333;
+            --card-bg: #000000;
+            --border-color: #000000;
+            --secondary-text: #000000;
         }
 
         /* Apply theme variables */
@@ -605,6 +622,146 @@
             color: var(--text-color);
             border-color: var(--border-color);
         }
+
+        /* Animation Keyframes */
+@keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Apply animations to components */
+.task-item, .note-item, .habit-item, .transaction-item {
+    animation: slideIn 0.3s ease-out;
+}
+
+.stat-card {
+    animation: scaleIn 0.4s ease-out;
+}
+
+.dashboard-card {
+    animation: slideUp 0.4s ease-out;
+}
+
+.btn-primary:active {
+    animation: pulse 0.3s ease-out;
+}
+
+.summary-card {
+    animation: scaleIn 0.4s ease-out;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.nav-tab {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-tab:hover {
+    transform: translateY(-2px) scale(1.05);
+}
+
+.modal-content {
+    animation: scaleIn 0.3s ease-out;
+}
+
+.chart-container {
+    animation: slideUp 0.4s ease-out;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chart-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.badge {
+    transition: all 0.2s ease;
+}
+
+.badge:hover {
+    transform: scale(1.1);
+}
+
+.stat-progress-fill {
+    animation: slideIn 1s ease-out;
+}
+
+.habit-progress-fill {
+    animation: slideIn 1s ease-out;
+}
+
+.theme-option {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-option:hover {
+    transform: scale(1.15) rotate(360deg);
+}
+
+/* Improve existing animations */
+.tab-content.active {
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(10px) scale(0.98);
+        filter: blur(5px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+/* Add loading animation */
+.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
     </style>
 </head>
 <body>
@@ -668,6 +825,15 @@
                     <h3>Budget Goals Progress</h3>
                     <div id="budgetGoalsProgress"></div>
                 </div>
+                <div class="chart-container">
+                    <h3>Expense Distribution</h3>
+                    <canvas id="expensesPieChart"></canvas>
+                    <div class="chart-legend" id="pieLegend"></div>
+                </div>
+                <div class="chart-container">
+                    <h3>Income vs Expenses</h3>
+                    <canvas id="incomeExpenseChart"></canvas>
+                </div>
             </div>
 
             <div class="chart-container" style="margin-top: 20px;">
@@ -709,19 +875,6 @@
                 <h2 class="section-title">Dashboard Overview</h2>
                 <button class="btn btn-primary" onclick="refreshDashboard()">
                     <i class="fas fa-sync-alt"></i> Refresh
-                </button>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <button class="btn btn-primary" onclick="openModal('taskModal')">
-                    <i class="fas fa-plus"></i> New Task
-                </button>
-                <button class="btn btn-primary" onclick="openModal('noteModal')">
-                    <i class="fas fa-sticky-note"></i> New Note
-                </button>
-                <button class="btn btn-primary" onclick="openModal('budgetModal')">
-                    <i class="fas fa-money-bill"></i> New Transaction
                 </button>
             </div>
 
@@ -1135,6 +1288,8 @@
             try {
                 const savedTasks = localStorage.getItem('tasks');
                 const savedTemplates = localStorage.getItem('taskTemplates');
+                const savedTransactions = localStorage.getItem('transactions');
+                const savedBudgetGoals = localStorage.getItem('budgetGoals');
                 
                 if (savedTasks) {
                     appData.tasks = JSON.parse(savedTasks);
@@ -1143,12 +1298,33 @@
                 if (savedTemplates) {
                     appData.taskTemplates = JSON.parse(savedTemplates);
                 }
+                
+                if (savedTransactions) {
+                    appData.transactions = JSON.parse(savedTransactions);
+                }
+                
+                if (savedBudgetGoals) {
+                    appData.budgetGoals = JSON.parse(savedBudgetGoals);
+                }
             } catch (e) {
                 console.error('Error loading saved data:', e);
                 appData.tasks = [];
                 appData.taskTemplates = [];
+                appData.transactions = [];
+                appData.budgetGoals = {
+                    Housing: 0,
+                    Transportation: 0,
+                    Food: 0,
+                    Utilities: 0,
+                    Healthcare: 0,
+                    Entertainment: 0,
+                    Shopping: 0,
+                    Savings: 0
+                };
                 localStorage.setItem('tasks', JSON.stringify([]));
                 localStorage.setItem('taskTemplates', JSON.stringify([]));
+                localStorage.setItem('transactions', JSON.stringify([]));
+                localStorage.setItem('budgetGoals', JSON.stringify(appData.budgetGoals));
             }
         }
 
@@ -1293,34 +1469,108 @@
             refreshDashboard();
         }
 
+        function addTransaction(event) {
+    event.preventDefault();
+    
+    const description = document.getElementById('transactionDescription').value;
+    const amount = parseFloat(document.getElementById('transactionAmount').value);
+    const type = document.getElementById('transactionType').value;
+    const category = document.getElementById('transactionCategory').value;
+    
+    if (!description || !amount || !category) {
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    const transaction = {
+        id: Date.now(),
+        description,
+        amount: type === 'expense' ? -Math.abs(amount) : Math.abs(amount),
+        type,
+        category,
+        date: new Date().toISOString()
+    };
+    
+    // Add to transactions array
+    appData.transactions.push(transaction);
+    
+    // Save to localStorage
+    localStorage.setItem('transactions', JSON.stringify(appData.transactions));
+    
+    // Clear form and close modal
+    document.getElementById('budgetModal').querySelector('form').reset();
+    closeModal('budgetModal');
+    
+    // Update UI
+    renderBudget();
+    refreshDashboard();
+}
+
         // Add refreshDashboard function if it doesn't exist
         function refreshDashboard() {
-            console.log('Refreshing dashboard...'); // Debug log
-            
-            // Update total tasks count
+            // Get the latest data
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const notes = JSON.parse(localStorage.getItem('notes')) || [];
+            const habits = JSON.parse(localStorage.getItem('habits')) || [];
+            const transactions = appData.transactions || [];
+
+            // Update total tasks and progress
             const totalTasksElement = document.getElementById('totalTasks');
-            if (totalTasksElement) {
-                totalTasksElement.textContent = appData.tasks.length;
-            }
-            
-            // Update task progress
             const taskProgress = document.getElementById('taskProgress');
-            if (taskProgress) {
-                const completedTasks = appData.tasks.filter(t => t.completed).length;
-                const progressPercent = (completedTasks / appData.tasks.length) * 100 || 0;
-                taskProgress.innerHTML = `
-                    <div class="stat-progress-fill" style="width: ${progressPercent}%"></div>
-                `;
+            if (totalTasksElement && taskProgress) {
+                const completedTasks = tasks.filter(t => t.completed).length;
+                const progressPercent = tasks.length ? (completedTasks / tasks.length) * 100 : 0;
+                
+                totalTasksElement.textContent = tasks.length;
+                taskProgress.innerHTML = `<div class="stat-progress-fill" style="width: ${progressPercent}%"></div>`;
             }
-            
-            // Update upcoming tasks
+
+            // Update total balance
+            const totalBalanceElement = document.getElementById('totalBalance');
+            if (totalBalanceElement) {
+                const balance = transactions.reduce((sum, t) => sum + t.amount, 0);
+                totalBalanceElement.textContent = `$${balance.toFixed(2)}`;
+                
+                // Update balance trend
+                const balanceTrend = document.getElementById('balanceTrend');
+                if (balanceTrend) {
+                    const lastMonthBalance = transactions
+                        .filter(t => new Date(t.date) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
+                        .reduce((sum, t) => sum + t.amount, 0);
+                    balanceTrend.textContent = `Last 30 days: ${lastMonthBalance >= 0 ? '↑' : '↓'} $${Math.abs(lastMonthBalance).toFixed(2)}`;
+                }
+            }
+
+            // Update notes count
+            const totalNotesElement = document.getElementById('totalNotes');
+            if (totalNotesElement) {
+                totalNotesElement.textContent = notes.length;
+            }
+
+            // Update habit streak
+            const habitStreakElement = document.getElementById('habitStreak');
+            if (habitStreakElement) {
+                const maxStreak = habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
+                habitStreakElement.textContent = maxStreak;
+            }
+
+            // Update dashboard cards
+            updateUpcomingTasks();
+            updateRecentTransactions();
+            updateRecentNotes();
+            updateDailyProgress();
+        }
+
+        // Helper functions for dashboard cards
+        function updateUpcomingTasks() {
             const upcomingTasks = document.getElementById('upcomingTasks');
             if (upcomingTasks) {
-                const pendingTasks = appData.tasks
+                const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                const pendingTasks = tasks
                     .filter(t => !t.completed)
                     .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
                     .slice(0, 5);
-                    
+
                 upcomingTasks.innerHTML = pendingTasks.length ? pendingTasks.map(task => `
                     <div class="task-item priority-${task.priority}">
                         <div class="item-title">${task.title}</div>
@@ -1333,322 +1583,58 @@
             }
         }
 
-        function scheduleNextRecurrence(task) {
-            const nextDate = calculateNextDueDate(task.dueDate, task.recurring);
-            if (!task.endDate || new Date(nextDate) <= new Date(task.endDate)) {
-                const newTask = {
-                    ...task,
-                    id: Date.now(),
-                    dueDate: nextDate,
-                    completed: false
-                };
-                appData.tasks.push(newTask);
-            }
-        }
-
-        function calculateNextDueDate(currentDate, recurring) {
-            const date = new Date(currentDate);
-            switch (recurring) {
-                case 'daily':
-                    date.setDate(date.getDate() + 1);
-                    break;
-                case 'weekly':
-                    date.setDate(date.getDate() + 7);
-                    break;
-                case 'monthly':
-                    date.setMonth(date.getMonth() + 1);
-                    break;
-            }
-            return date.toISOString().split('T')[0];
-        }
-
-        function toggleTask(id) {
-            const task = appData.tasks.find(t => t.id === id);
-            if (task) {
-                task.completed = !task.completed;
-                if (task.completed) {
-                    task.completionHistory.push({
-                        completedAt: new Date().toISOString(),
-                        onTime: new Date(task.dueDate) >= new Date()
-                    });
-                }
-                
-                // Save changes
-                localStorage.setItem('tasks', JSON.stringify(appData.tasks));
-                
-                renderTasks();
-                if (task.completed && task.recurring) {
-                    scheduleNextRecurrence(task);
-                }
-            }
-        }
-
-        function deleteTask(id) {
-            appData.tasks = appData.tasks.filter(t => t.id !== id);
-            // Save changes
-            localStorage.setItem('tasks', JSON.stringify(appData.tasks));
-            renderTasks();
-        }
-
-        function filterTasks() {
-            renderTasks();
-        }
-
-        function renderTasks() {
-            const searchTerm = document.getElementById('taskSearch')?.value.toLowerCase() || '';
-            const priorityFilter = document.getElementById('priorityFilter')?.value || '';
-            const statusFilter = document.getElementById('statusFilter')?.value || '';
-            
-            let filteredTasks = appData.tasks.filter(task => {
-                const matchesSearch = task.title.toLowerCase().includes(searchTerm) || 
-                                    task.description.toLowerCase().includes(searchTerm);
-                const matchesPriority = !priorityFilter || task.priority === priorityFilter;
-                const matchesStatus = !statusFilter || 
-                    (statusFilter === 'completed' && task.completed) ||
-                    (statusFilter === 'pending' && !task.completed);
-                
-                return matchesSearch && matchesPriority && matchesStatus;
-            });
-            
-            const tasksList = document.getElementById('tasksList');
-            if (!tasksList) return;
-            
-            tasksList.innerHTML = filteredTasks.map(task => `
-                <div class="task-item ${task.completed ? 'completed' : ''} priority-${task.priority}">
-                    <div class="item-header">
-                        <div>
-                            <div class="item-title task-title">${task.title}</div>
-                            <div class="task-meta">
-                                ${task.recurring ? `<span class="badge">🔄 ${task.recurring}</span>` : ''}
-                                <span class="badge">📂 ${task.category}</span>
-                                ${!task.recurring && !task.completed ? 
-                                    `<span class="badge">💡 Suggested Priority: ${getSmartPriority(task)}</span>` 
-                                    : ''
-                                }
-                            </div>
-                        </div>
-                        <div class="item-actions">
-                            <button class="btn btn-small ${task.completed ? 'btn-primary' : 'btn-success'}" 
-                                    onclick="toggleTask(${task.id})">
-                                ${task.completed ? 'Undo' : 'Complete'}
-                            </button>
-                            <button class="btn btn-small btn-danger" onclick="deleteTask(${task.id})">Delete</button>
-                        </div>
-                    </div>
-                    <div class="task-description">${task.description}</div>
-                    <div style="margin-top: 10px; font-size: 0.9rem; color: #666;">
-                        Priority: ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                        ${task.dueDate ? ` | Due: ${new Date(task.dueDate).toLocaleDateString()}` : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Budget Management
-        function addTransaction(event) {
-            event.preventDefault();
-            
-            const amount = parseFloat(document.getElementById('transactionAmount').value);
-            const transaction = {
-                id: Date.now(),
-                description: document.getElementById('transactionDescription').value,
-                amount: document.getElementById('transactionType').value === 'expense' ? -amount : amount,
-                type: document.getElementById('transactionType').value,
-                category: document.getElementById('transactionCategory').value,
-                date: new Date().toISOString()
-            };
-            
-            appData.transactions.push(transaction);
-            renderBudget();
-            closeModal('budgetModal');
-        }
-
-        function deleteTransaction(id) {
-            appData.transactions = appData.transactions.filter(t => t.id !== id);
-            renderBudget();
-        }
-
-        // Initialize empty budget goals
-        appData.budgetGoals = {
-            Housing: 0,
-            Transportation: 0,
-            Food: 0,
-            Utilities: 0,
-            Healthcare: 0,
-            Entertainment: 0,
-            Shopping: 0,
-            Savings: 0
-        };
-
-        // Load existing budget goals into form
-        function loadBudgetGoals() {
-            Object.entries(appData.budgetGoals).forEach(([category, amount]) => {
-                const input = document.getElementById(`goal_${category}`);
-                if (input) {
-                    input.value = amount;
-                }
-            });
-        }
-
-        function setBudgetGoals(event) {
-            event.preventDefault();
-            const categories = ['Housing', 'Transportation', 'Food', 'Utilities', 
-                              'Healthcare', 'Entertainment', 'Shopping', 'Savings'];
-            
-            categories.forEach(category => {
-                const input = document.getElementById(`goal_${category}`);
-                if (input) {
-                    appData.budgetGoals[category] = parseFloat(input.value) || 0;
-                }
-            });
-            
-            localStorage.setItem('budgetGoals', JSON.stringify(appData.budgetGoals));
-            closeModal('budgetGoalModal');
-            renderBudget();
-        }
-
-        function getMonthlySpending() {
-            const now = new Date();
-            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-            
-            return appData.transactions
-                .filter(t => new Date(t.date) >= firstDay && t.type === 'expense')
-                .reduce((acc, t) => {
-                    acc[t.category] = (acc[t.category] || 0) + Math.abs(t.amount);
-                    return acc;
-                }, {});
-        }
-
-        function generateSpendingInsights() {
-            const spending = getMonthlySpending();
-            const insights = [];
-            
-            Object.entries(spending).forEach(([category, amount]) => {
-                const goal = appData.budgetGoals[category];
-                if (goal) {
-                    const percentage = (amount / goal) * 100;
-                    if (percentage > 90) {
-                        insights.push(`
-                            <div class="budget-alert">
-                                ⚠️ You've spent ${percentage.toFixed(1)}% of your ${category} budget
-                            </div>
-                        `);
-                    }
-                }
-            });
-            
-            // Add savings recommendation
-            const totalIncome = appData.transactions
-                .filter(t => t.type === 'income')
-                .reduce((sum, t) => sum + t.amount, 0);
-            const totalExpenses = Object.values(spending).reduce((sum, amount) => sum + amount, 0);
-            const savingsRate = ((totalIncome - totalExpenses) / totalIncome) * 100;
-            
-            if (savingsRate < 20) {
-                insights.push(`
-                    <div class="budget-alert">
-                        💡 Your current savings rate is ${savingsRate.toFixed(1)}%. 
-                        Consider reducing expenses in non-essential categories to reach a 20% savings goal.
-                    </div>
-                `);
-            }
-            
-            return insights.join('');
-        }
-
-        function renderBudget() {
-            const totalIncome = appData.transactions
-                .filter(t => t.type === 'income')
-                .reduce((sum, t) => sum + t.amount, 0);
-            
-            const totalExpenses = Math.abs(appData.transactions
-                .filter(t => t.type === 'expense')
-                .reduce((sum, t) => sum + t.amount, 0));
-            
-            const balance = totalIncome - totalExpenses;
-            
-            // Update summary
-            const budgetSummary = document.getElementById('budgetSummary');
-            if (budgetSummary) {
-                budgetSummary.innerHTML = `
-                    <div class="summary-card">
-                        <div class="summary-value">$${totalIncome.toFixed(2)}</div>
-                        <div class="summary-label">Total Income</div>
-                    </div>
-                    <div class="summary-card">
-                        <div class="summary-value">$${totalExpenses.toFixed(2)}</div>
-                        <div class="summary-label">Total Expenses</div>
-                    </div>
-                    <div class="summary-card">
-                        <div class="summary-value">$${balance.toFixed(2)}</div>
-                        <div class="summary-label">Balance</div>
-                    </div>
-                `;
-            }
-            
-            // Update transactions list
-            const transactionsList = document.getElementById('transactionsList');
-            if (transactionsList) {
-                transactionsList.innerHTML = appData.transactions
+        function updateRecentTransactions() {
+            const recentTransactions = document.getElementById('recentTransactions');
+            if (recentTransactions) {
+                const transactions = appData.transactions
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .map(transaction => `
-                        <div class="transaction-item transaction-${transaction.type}">
-                            <div class="item-header">
-                                <div class="item-title">${transaction.description}</div>
-                                <div class="item-actions">
-                                    <span style="font-weight: bold; color: ${transaction.amount > 0 ? '#4caf50' : '#f44336'}">
-                                        ${transaction.amount > 0 ? '+' : ''}$${Math.abs(transaction.amount).toFixed(2)}
-                                    </span>
-                                    <button class="btn btn-small btn-danger" onclick="deleteTransaction(${transaction.id})">Delete</button>
-                                </div>
-                            </div>
-                            <div style="font-size: 0.9rem; color: #666;">
-                                ${transaction.category} | ${new Date(transaction.date).toLocaleDateString()}
-                            </div>
+                    .slice(0, 5);
+
+                recentTransactions.innerHTML = transactions.length ? transactions.map(transaction => `
+                    <div class="transaction-item transaction-${transaction.type}">
+                        <div class="item-title">${transaction.description}</div>
+                        <div class="task-meta">
+                            <span class="badge">${transaction.type === 'income' ? '💰' : '💸'} $${Math.abs(transaction.amount).toFixed(2)}</span>
+                            <span class="badge">📅 ${new Date(transaction.date).toLocaleDateString()}</span>
                         </div>
-                    `).join('');
+                    </div>
+                `).join('') : '<p>No recent transactions</p>';
             }
-            
-            // Render category spending chart
-            const categoryChart = document.getElementById('categoryChart');
-            if (categoryChart) {
-                const spending = getMonthlySpending();
-                const chartHtml = Object.entries(spending)
-                    .sort(([,a], [,b]) => b - a)
-                    .map(([category, amount]) => {
-                        const goal = appData.budgetGoals[category] || amount;
-                        const percentage = Math.min((amount / goal) * 100, 100);
-                        return `
-                            <div class="category-item">
-                                <div class="expense-bar" style="--percent: ${percentage}%">
-                                    <span class="expense-label">${category}</span>
-                                    <span class="expense-amount">$${amount.toFixed(2)} / $${goal}</span>
-                            </div>
-                        `;
-                    }).join('');
-                
-                categoryChart.innerHTML = chartHtml;
+        }
+
+        function updateRecentNotes() {
+            const recentNotes = document.getElementById('recentNotes');
+            if (recentNotes) {
+                const notes = JSON.parse(localStorage.getItem('notes')) || [];
+                const recentNotesList = notes
+                    .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate))
+                    .slice(0, 5);
+
+                recentNotes.innerHTML = recentNotesList.length ? recentNotesList.map(note => `
+                    <div class="note-item">
+                        <div class="item-title">${note.title}</div>
+                        <div class="task-meta">
+                            ${note.tags.map(tag => `<span class="badge">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                `).join('') : '<p>No recent notes</p>';
             }
-            
-            // Render spending insights
-            const spendingInsights = document.getElementById('spendingInsights');
-            if (spendingInsights) {
-                spendingInsights.innerHTML = generateSpendingInsights() || 
-                    '<div class="budget-success">👍 Your spending is within budget!</div>';
-            }
-            
-            // Render budget goals progress
-            const budgetGoalsProgress = document.getElementById('budgetGoalsProgress');
-            if (budgetGoalsProgress) {
-                const spending = getMonthlySpending();
-                const totalBudget = Object.values(appData.budgetGoals).reduce((sum, goal) => sum + goal, 0);
-                const totalSpent = Object.values(spending).reduce((sum, amount) => sum + amount, 0);
-                const percentage = (totalSpent / totalBudget) * 100;
-                
-                budgetGoalsProgress.innerHTML = `
-                    <div class="expense-bar" style="--percent: ${percentage}%">
-                        <span class="expense-label">Overall Budget</span>
-                        <span class="expense-amount">$${totalSpent.toFixed(2)} / $${totalBudget}</span>
+        }
+
+        function updateDailyProgress() {
+            const dailyProgress = document.getElementById('dailyProgress');
+            if (dailyProgress) {
+                const habits = JSON.parse(localStorage.getItem('habits')) || [];
+                const today = new Date().toDateString();
+                const todaysHabits = habits.filter(h => h.lastCompleted === today);
+                const completionRate = habits.length ? (todaysHabits.length / habits.length) * 100 : 0;
+
+                dailyProgress.innerHTML = `
+                    <div class="stat-progress">
+                        <div class="stat-progress-fill" style="width: ${completionRate}%"></div>
+                    </div>
+                    <div class="stat-details">
+                        ${todaysHabits.length} of ${habits.length} habits completed today (${completionRate.toFixed(1)}%)
                     </div>
                 `;
             }
@@ -1763,73 +1749,80 @@
             initializeTheme();
         });
 
-        function renderNotes() {
-            const notesList = document.getElementById('notesList');
-            if (!notesList) return;
-            
-            const notes = JSON.parse(localStorage.getItem('notes')) || [];
-            notesList.innerHTML = notes.map(note => `
-                <div class="note-item">
-                    <div class="item-header">
-                        <div class="item-title">${note.title}</div>
-                        <div class="item-actions">
-                            <button class="btn btn-small btn-danger" onclick="deleteNote(${note.id})">Delete</button>
-                        </div>
-                    </div>
-                    <div class="note-content">${note.content}</div>
-                    <div class="task-meta">
-                        ${note.tags.map(tag => `<span class="badge">${tag}</span>`).join('')}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function addNote(event) {
-            event.preventDefault();
-            
-            const noteTitle = document.getElementById('noteTitle').value.trim();
-            const noteContent = document.getElementById('noteContent').value.trim();
-            const noteTags = document.getElementById('noteTags').value.split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
-    
-    if (!noteTitle || !noteContent) {
-        alert('Please fill in required fields');
-        return;
-    }
-    
-    const note = {
-        id: Date.now(),
-        title: noteTitle,
-        content: noteContent,
-        tags: noteTags,
-        createdDate: new Date().toISOString()
-    };
-    
-    // Get existing notes
-    let notes = JSON.parse(localStorage.getItem('notes')) || [];
-    notes.push(note);
-    
-    // Save to localStorage
-    localStorage.setItem('notes', JSON.stringify(notes));
-    appData.notes = notes;
-    
-    // Clear form and close modal
-    document.getElementById('noteModal').querySelector('form').reset();
-    closeModal('noteModal');
-    
-    // Update UI
-    renderNotes();
-    refreshDashboard();
+        // Add loading state to components
+function showLoading(element) {
+    element.classList.add('loading');
 }
 
-function deleteNote(id) {
-    let notes = JSON.parse(localStorage.getItem('notes')) || [];
-    notes = notes.filter(n => n.id !== id);
-    localStorage.setItem('notes', JSON.stringify(notes));
-    appData.notes = notes;
-    renderNotes();
-    refreshDashboard();
+function hideLoading(element) {
+    element.classList.remove('loading');
+}
+
+// Update refresh functions to show loading state
+function refreshDashboard() {
+    const dashboard = document.getElementById('dashboard');
+    showLoading(dashboard);
+    
+    setTimeout(() => {
+        // Existing refresh code...
+        hideLoading(dashboard);
+    }, 500);
+}
+
+// Update render functions to add staggered animations
+function renderTasks() {
+    const tasksList = document.getElementById('tasksList');
+    if (!tasksList) return;
+    
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    tasksList.innerHTML = tasks.map(task => `
+        <div class="task-item priority-${task.priority}">
+            <div class="item-header">
+                <div class="item-title">${task.title}</div>
+                <div class="item-actions">
+                    <button class="btn btn-small btn-success" onclick="completeTask(${task.id})">✔️</button>
+                    <button class="btn btn-small btn-danger" onclick="deleteTask(${task.id})">🗑️</button>
+                </div>
+            </div>
+            <div class="task-meta">
+                <span class="badge">📅 ${new Date(task.dueDate).toLocaleDateString()}</span>
+                <span class="badge">📂 ${task.category}</span>
+            </div>
+        </div>
+    `).join('');
+    
+    setTimeout(() => {
+        document.querySelectorAll('.task-item').forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+        });
+    }, 0);
+}
+
+function renderNotes() {
+    const notesList = document.getElementById('notesList');
+    if (!notesList) return;
+    
+    const notes = JSON.parse(localStorage.getItem('notes')) || [];
+    notesList.innerHTML = notes.map(note => `
+        <div class="note-item">
+            <div class="item-header">
+                <div class="item-title">${note.title}</div>
+                <div class="item-actions">
+                    <button class="btn btn-small btn-danger" onclick="deleteNote(${note.id})">Delete</button>
+                </div>
+            </div>
+            <div class="note-content">${note.content}</div>
+            <div class="task-meta">
+                ${note.tags.map(tag => `<span class="badge">${tag}</span>`).join('')}
+            </div>
+        </div>
+    `).join('');
+    
+    setTimeout(() => {
+        document.querySelectorAll('.note-item').forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+        });
+    }, 0);
 }
 
 function renderHabits() {
@@ -1858,74 +1851,291 @@ function renderHabits() {
     `).join('');
 }
 
-function addHabit(event) {
+// Add this new function to render the pie chart
+function renderExpensePieChart() {
+    const ctx = document.getElementById('expensesPieChart').getContext('2d');
+    
+    // Get expenses by category
+    const expenses = appData.transactions
+        .filter(t => t.type === 'expense')
+        .reduce((acc, t) => {
+            acc[t.category] = (acc[t.category] || 0) + Math.abs(t.amount);
+            return acc;
+        }, {});
+    
+    // Prepare data for chart
+    const labels = Object.keys(expenses);
+    const data = Object.values(expenses);
+    
+    // Colors for different categories
+    const colors = [
+        '#FF6384', // Red
+        '#36A2EB', // Blue
+        '#FFCE56', // Yellow
+        '#4BC0C0', // Teal
+        '#9966FF', // Purple
+        '#FF9F40', // Orange
+        '#45B7D1', // Light Blue
+        '#96C93D'  // Green
+    ];
+    
+    // Create pie chart
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors.slice(0, labels.length),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 10,
+                    bottom: 10
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 10,
+                        font: {
+                            size: 11
+                        },
+                        boxWidth: 15
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const value = context.raw;
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${context.label}: $${value.toFixed(2)} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Add this function after renderExpensePieChart
+function renderIncomeExpenseChart() {
+    const ctx = document.getElementById('incomeExpenseChart').getContext('2d');
+    
+    // Get last 6 months of data
+    const months = [];
+    const incomeData = [];
+    const expenseData = [];
+    
+    for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthYear = date.toLocaleString('default', { month: 'short', year: '2-digit' });
+        
+        const monthTransactions = appData.transactions.filter(t => {
+            const tDate = new Date(t.date);
+            return tDate.getMonth() === date.getMonth() && 
+                   tDate.getFullYear() === date.getFullYear();
+        });
+        
+        const monthlyIncome = monthTransactions
+            .filter(t => t.type === 'income')
+            .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+            
+        const monthlyExpense = monthTransactions
+            .filter(t => t.type === 'expense')
+            .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+        
+        months.push(monthYear);
+        incomeData.push(monthlyIncome);
+        expenseData.push(monthlyExpense);
+    }
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [
+                {
+                    label: 'Income',
+                    data: incomeData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Expenses',
+                    data: expenseData,
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 10,
+                        font: { size: 11 },
+                        boxWidth: 15
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': $' + 
+                                   context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Update the renderBudget function to include the new chart
+function renderBudget() {
+    // Render budget summary
+    const summary = document.getElementById('budgetSummary');
+    const transactions = appData.transactions;
+    
+    const income = transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+        
+    const expenses = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+        
+    const balance = income - expenses;
+    
+    summary.innerHTML = `
+        <div class="summary-card">
+            <div class="summary-value">$${income.toFixed(2)}</div>
+            <div class="summary-label">Total Income</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value">$${expenses.toFixed(2)}</div>
+            <div class="summary-label">Total Expenses</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value">$${balance.toFixed(2)}</div>
+            <div class="summary-label">Net Balance</div>
+        </div>
+    `;
+    
+    // Render pie chart
+    renderExpensePieChart();
+    
+    // Render income vs expense chart
+    renderIncomeExpenseChart();
+    
+    // Render recent transactions
+    const transactionsList = document.getElementById('transactionsList');
+    if (transactionsList) {
+        transactionsList.innerHTML = transactions
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .map(transaction => `
+                <div class="transaction-item transaction-${transaction.type}">
+                    <div class="item-header">
+                        <div class="item-title">${transaction.description}</div>
+                        <div class="item-actions">
+                            <button class="btn btn-small btn-danger" onclick="deleteTransaction(${transaction.id})">Delete</button>
+                        </div>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge">${transaction.type === 'income' ? '💰' : '💸'} $${Math.abs(transaction.amount).toFixed(2)}</span>
+                        <span class="badge">📂 ${transaction.category}</span>
+                        <span class="badge">📅 ${new Date(transaction.date).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `).join('') || '<p>No transactions yet</p>';
+    }
+}
+
+function deleteTransaction(id) {
+    appData.transactions = appData.transactions.filter(t => t.id !== id);
+    localStorage.setItem('transactions', JSON.stringify(appData.transactions));
+    renderBudget();
+    refreshDashboard();
+}
+
+// Update loadSavedData to include transactions
+function loadSavedData() {
+    try {
+        const savedTasks = localStorage.getItem('tasks');
+        const savedTemplates = localStorage.getItem('taskTemplates');
+        const savedTransactions = localStorage.getItem('transactions');
+        const savedBudgetGoals = localStorage.getItem('budgetGoals');
+        
+        if (savedTasks) {
+            appData.tasks = JSON.parse(savedTasks);
+        }
+        
+        if (savedTemplates) {
+            appData.taskTemplates = JSON.parse(savedTemplates);
+        }
+        
+        if (savedTransactions) {
+            appData.transactions = JSON.parse(savedTransactions);
+        }
+        
+        if (savedBudgetGoals) {
+            appData.budgetGoals = JSON.parse(savedBudgetGoals);
+        }
+    } catch (e) {
+        console.error('Error loading saved data:', e);
+    }
+}
+
+function setBudgetGoals(event) {
     event.preventDefault();
     
-    const habitName = document.getElementById('habitName').value.trim();
-    const habitDescription = document.getElementById('habitDescription').value.trim();
-    const habitTarget = parseInt(document.getElementById('habitTarget').value) || 1;
+    const categories = ['Housing', 'Transportation', 'Food', 'Utilities', 
+                       'Healthcare', 'Entertainment', 'Shopping', 'Savings'];
+                       
+    categories.forEach(category => {
+        const input = document.getElementById(`goal_${category}`);
+        appData.budgetGoals[category] = parseFloat(input.value) || 0;
+    });
     
-    if (!habitName) {
-        alert('Please enter a habit name');
-        return;
-    }
-    
-    const habit = {
-        id: Date.now(),
-        name: habitName,
-        description: habitDescription,
-        target: habitTarget,
-        completedToday: 0,
-        streak: 0,
-        lastCompleted: null,
-        createdDate: new Date().toISOString()
-    };
-    
-    // Get existing habits
-    let habits = JSON.parse(localStorage.getItem('habits')) || [];
-    habits.push(habit);
-    
-    // Save to localStorage
-    localStorage.setItem('habits', JSON.stringify(habits));
-    appData.habits = habits;
-    
-    // Clear form and close modal
-    document.getElementById('habitModal').querySelector('form').reset();
-    closeModal('habitModal');
-    
-    // Update UI
-    renderHabits();
-    refreshDashboard();
+    localStorage.setItem('budgetGoals', JSON.stringify(appData.budgetGoals));
+    closeModal('budgetGoalModal');
+    renderBudget();
 }
 
-function deleteHabit(id) {
-    let habits = JSON.parse(localStorage.getItem('habits')) || [];
-    habits = habits.filter(h => h.id !== id);
-    localStorage.setItem('habits', JSON.stringify(habits));
-    appData.habits = habits;
-    renderHabits();
-    refreshDashboard();
-}
-
-function trackHabit(id) {
-    let habits = JSON.parse(localStorage.getItem('habits')) || [];
-    const habit = habits.find(h => h.id === id);
-    if (habit) {
-        const today = new Date().toDateString();
-        if (habit.lastCompleted !== today) {
-            habit.completedToday = 1;
-            habit.streak = habit.streak + 1;
-        } else {
-            habit.completedToday = Math.min(habit.completedToday + 1, habit.target);
+// Add this to initialize budget goals in the modal
+function loadBudgetGoals() {
+    Object.entries(appData.budgetGoals).forEach(([category, amount]) => {
+        const input = document.getElementById(`goal_${category}`);
+        if (input) {
+            input.value = amount;
         }
-        habit.lastCompleted = today;
-        
-        localStorage.setItem('habits', JSON.stringify(habits));
-        appData.habits = habits;
-        renderHabits();
-        refreshDashboard();
-    }
+    });
 }
     </script>
+    <!-- Add Chart.js library before closing body tag -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
