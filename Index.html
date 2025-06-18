@@ -1348,9 +1348,11 @@
                 clickedElement.classList.add('active');
             }
             
-            // Refresh content if needed
+            // Refresh content based on tab
             if (tabName === 'dashboard') {
                 refreshDashboard();
+            } else if (tabName === 'budget') {
+                renderBudget();
             }
         }
 
@@ -1503,62 +1505,69 @@
     
     // Update UI
     renderBudget();
-    refreshDashboard();
+    refreshDashboard(); // Add this line
 }
 
         // Add refreshDashboard function if it doesn't exist
         function refreshDashboard() {
-            // Get the latest data
-            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-            const notes = JSON.parse(localStorage.getItem('notes')) || [];
-            const habits = JSON.parse(localStorage.getItem('habits')) || [];
-            const transactions = appData.transactions || [];
+            const dashboard = document.getElementById('dashboard');
+            showLoading(dashboard);
+            
+            setTimeout(() => {
+                // Get latest data
+                const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                const notes = JSON.parse(localStorage.getItem('notes')) || [];
+                const habits = JSON.parse(localStorage.getItem('habits')) || [];
+                const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 
-            // Update total tasks and progress
-            const totalTasksElement = document.getElementById('totalTasks');
-            const taskProgress = document.getElementById('taskProgress');
-            if (totalTasksElement && taskProgress) {
-                const completedTasks = tasks.filter(t => t.completed).length;
-                const progressPercent = tasks.length ? (completedTasks / tasks.length) * 100 : 0;
-                
-                totalTasksElement.textContent = tasks.length;
-                taskProgress.innerHTML = `<div class="stat-progress-fill" style="width: ${progressPercent}%"></div>`;
-            }
-
-            // Update total balance
-            const totalBalanceElement = document.getElementById('totalBalance');
-            if (totalBalanceElement) {
-                const balance = transactions.reduce((sum, t) => sum + t.amount, 0);
-                totalBalanceElement.textContent = `$${balance.toFixed(2)}`;
-                
-                // Update balance trend
-                const balanceTrend = document.getElementById('balanceTrend');
-                if (balanceTrend) {
-                    const lastMonthBalance = transactions
-                        .filter(t => new Date(t.date) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
-                        .reduce((sum, t) => sum + t.amount, 0);
-                    balanceTrend.textContent = `Last 30 days: ${lastMonthBalance >= 0 ? '↑' : '↓'} $${Math.abs(lastMonthBalance).toFixed(2)}`;
+                // Update stats
+                const totalTasksElement = document.getElementById('totalTasks');
+                const taskProgress = document.getElementById('taskProgress');
+                if (totalTasksElement && taskProgress) {
+                    const completedTasks = tasks.filter(t => t.completed).length;
+                    const progressPercent = tasks.length ? (completedTasks / tasks.length) * 100 : 0;
+                    
+                    totalTasksElement.textContent = tasks.length;
+                    taskProgress.innerHTML = `<div class="stat-progress-fill" style="width: ${progressPercent}%"></div>`;
                 }
-            }
 
-            // Update notes count
-            const totalNotesElement = document.getElementById('totalNotes');
-            if (totalNotesElement) {
-                totalNotesElement.textContent = notes.length;
-            }
+                // Update balance
+                const totalBalanceElement = document.getElementById('totalBalance');
+                if (totalBalanceElement) {
+                    const balance = transactions.reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+                    totalBalanceElement.textContent = `$${balance.toFixed(2)}`;
+                    
+                    // Update trend
+                    const balanceTrend = document.getElementById('balanceTrend');
+                    if (balanceTrend) {
+                        const lastMonthBalance = transactions
+                            .filter(t => new Date(t.date) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
+                            .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+                        balanceTrend.textContent = `Last 30 days: ${lastMonthBalance >= 0 ? '↑' : '↓'} $${Math.abs(lastMonthBalance).toFixed(2)}`;
+                    }
+                }
 
-            // Update habit streak
-            const habitStreakElement = document.getElementById('habitStreak');
-            if (habitStreakElement) {
-                const maxStreak = habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
-                habitStreakElement.textContent = maxStreak;
-            }
+                // Update notes count
+                const totalNotesElement = document.getElementById('totalNotes');
+                if (totalNotesElement) {
+                    totalNotesElement.textContent = notes.length;
+                }
 
-            // Update dashboard cards
-            updateUpcomingTasks();
-            updateRecentTransactions();
-            updateRecentNotes();
-            updateDailyProgress();
+                // Update habit streak
+                const habitStreakElement = document.getElementById('habitStreak');
+                if (habitStreakElement) {
+                    const maxStreak = habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
+                    habitStreakElement.textContent = maxStreak;
+                }
+
+                // Update all dashboard sections
+                updateUpcomingTasks();
+                updateRecentTransactions();
+                updateRecentNotes();
+                updateDailyProgress();
+                
+                hideLoading(dashboard);
+            }, 500);
         }
 
         // Helper functions for dashboard cards
@@ -1764,7 +1773,58 @@ function refreshDashboard() {
     showLoading(dashboard);
     
     setTimeout(() => {
-        // Existing refresh code...
+        // Get latest data
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        const notes = JSON.parse(localStorage.getItem('notes')) || [];
+        const habits = JSON.parse(localStorage.getItem('habits')) || [];
+        const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+        // Update stats
+        const totalTasksElement = document.getElementById('totalTasks');
+        const taskProgress = document.getElementById('taskProgress');
+        if (totalTasksElement && taskProgress) {
+            const completedTasks = tasks.filter(t => t.completed).length;
+            const progressPercent = tasks.length ? (completedTasks / tasks.length) * 100 : 0;
+            
+            totalTasksElement.textContent = tasks.length;
+            taskProgress.innerHTML = `<div class="stat-progress-fill" style="width: ${progressPercent}%"></div>`;
+        }
+
+        // Update balance
+        const totalBalanceElement = document.getElementById('totalBalance');
+        if (totalBalanceElement) {
+            const balance = transactions.reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+            totalBalanceElement.textContent = `$${balance.toFixed(2)}`;
+            
+            // Update trend
+            const balanceTrend = document.getElementById('balanceTrend');
+            if (balanceTrend) {
+                const lastMonthBalance = transactions
+                    .filter(t => new Date(t.date) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
+                    .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+                balanceTrend.textContent = `Last 30 days: ${lastMonthBalance >= 0 ? '↑' : '↓'} $${Math.abs(lastMonthBalance).toFixed(2)}`;
+            }
+        }
+
+        // Update notes count
+        const totalNotesElement = document.getElementById('totalNotes');
+        if (totalNotesElement) {
+            totalNotesElement.textContent = notes.length;
+        }
+
+        // Update habit streak
+        const habitStreakElement = document.getElementById('habitStreak');
+        if (habitStreakElement) {
+            const maxStreak = habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
+            habitStreakElement.textContent = maxStreak;
+        }
+
+        // Update all dashboard sections
+        updateUpcomingTasks();
+        updateRecentTransactions();
+        updateRecentNotes();
+        updateDailyProgress();
+        
         hideLoading(dashboard);
     }, 500);
 }
