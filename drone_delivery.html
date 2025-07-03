@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyDrop - Fast Drone Delivery Service</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #0a0a0a, #1a1a2e, #16213e);
+            z-index: -2;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.2) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 5%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        nav.scrolled {
+            padding: 10px 5%;
+            background: rgba(10, 10, 10, 0.98);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: slideUp 1s ease 0.2s both;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            animation: slideUp 1s ease 0.4s both;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: slideUp 1s ease 0.6s both;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        /* Floating Drone Animation */
+        .drone-animation {
+            position: absolute;
+            top: 20%;
+            right: 10%;
+            width: 100px;
+            height: 60px;
+            animation: droneFloat 6s ease-in-out infinite;
+        }
+
+        .drone {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .drone::before,
+        .drone::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            top: -10px;
+            animation: propeller 0.1s linear infinite;
+        }
+
+        .drone::before { left: 10px; }
+        .drone::after { right: 10px; }
+
+        @keyframes droneFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(2deg); }
+            50% { transform: translateY(-20px) rotate(0deg); }
+            75% { transform: translateY(-10px) rotate(-2deg); }
+        }
+
+        @keyframes propeller {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Services Section */
+        .services {
+            padding: 100px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .service-card:hover::before {
+            opacity: 1;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .service-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .service-card p {
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        /* Order Tracking Section */
+        .tracking {
+            padding: 100px 5%;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+        }
+
+        .tracking-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .tracking-input {
+            display: flex;
+            gap: 1rem;
+            max-width: 500px;
+            margin: 2rem auto;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tracking-input input {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            backdrop-filter: blur(20px);
+        }
+
+        .tracking-input input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .tracking-input input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Live Map Simulation */
+        .live-map {
+            margin: 3rem auto;
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .map-drone {
+            position: absolute;
+            width: 20px;
+            height: 12px;
+            background: #667eea;
+            border-radius: 3px;
+            top: 50%;
+            left: 10%;
+            animation: mapDroneMove 8s ease-in-out infinite;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .delivery-path {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea 0%, rgba(102, 126, 234, 0.3) 100%);
+            transform: translateY(-50%);
+            animation: pathGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes mapDroneMove {
+            0% { left: 10%; }
+            100% { left: 85%; }
+        }
+
+        @keyframes pathGlow {
+            0% { box-shadow: 0 0 5px rgba(102, 126, 234, 0.5); }
+            100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.8), 0 0 30px rgba(102, 126, 234, 0.4); }
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 100px 5%;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 3rem auto;
+        }
+
+        .stat-item {
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        /* Footer */
+        footer {
+            padding: 50px 5%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #667eea;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 3rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .drone-animation {
+                right: 5%;
+                width: 80px;
+                height: 48px;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tracking-input {
+                flex-direction: column;
+            }
+            
+            .tracking-input input {
+                min-width: 100%;
+            }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Order Form Styles */
+        .order-form {
+            padding: 100px 5%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+        }
+
+        .order-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .delivery-form {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 3rem;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 3rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            position: relative;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .location-icon {
+            position: absolute;
+            right: 15px;
+            top: 45px;
+            font-size: 1.2rem;
+            pointer-events: none;
+        }
+
+        .price-calculator {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .price-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+        }
+
+        .price-item.total {
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            padding-top: 1rem;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #667eea;
+        }
+
+        .order-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.2rem;
+            margin-top: 1rem;
+        }
+
+        /* Fleet Status Styles */
+        .fleet-status {
+            padding: 100px 5%;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.8) 0%, rgba(22, 33, 62, 0.8) 100%);
+        }
+
+        .fleet-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .fleet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .fleet-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fleet-card.active {
+            border-color: #667eea;
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .fleet-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .drone-status-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: hoverFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes hoverFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .fleet-card h3 {
+            color: #ffffff;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            position: relative;
+        }
+
+        .status-indicator.online {
+            background: #4CAF50;
+            box-shadow: 0 0 10px #4CAF50;
+        }
+
+        .status-indicator.charging {
+            background: #FF9800;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-text {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .battery-level {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .battery-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .battery-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .charging-animation {
+            animation: charging 2s ease-in-out infinite;
+        }
+
+        @keyframes charging {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .fleet-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .fleet-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .fleet-stat:hover {
+            transform: translateY(-5px);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo">🚁 SkyDrop</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#order">Order Now</a></li>
+                <li><a href="#tracking">Track Order</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Sky-High Speed Delivery</h1>
+            <p>Experience the future of delivery with our cutting-edge drone technology. Fast, reliable, and environmentally friendly.</p>
+            <div class="cta-buttons">
+                <a href="#order" class="btn btn-primary">Order Now</a>
+                <a href="#tracking" class="btn btn-secondary">Track Package</a>
+            </div>
+        </div>
+        <div class="drone-animation">
+            <div class="drone"></div>
+        </div>
+    </section>
+
+    <section class="services" id="services">
+        <h2 class="section-title">Our Services</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <span class="service-icon">⚡</span>
+                <h3>Express Delivery</h3>
+                <p>Get your packages delivered in under 30 minutes within the city limits. Perfect for urgent deliveries and last-minute needs.</p>
+            </div>
+            <div class="service-card">
+                <span class="service-icon">📦</span>
+                <h3>Standard Delivery</h3>
+                <p>Reliable same-day delivery service with real-time tracking. Ideal for everyday packages and regular shipments.</p>
+            </div>
+            <div class="service-card">
+                <span class="service-icon">🍕</span>
+                <h3>Food Delivery</h3>
+                <p>Hot meals delivered fresh from your favorite restaurants. Temperature-controlled compartments ensure quality.</p>
+            </div>
+            <div class="service-card">
+                <span class="service-icon">💊</span>
+                <h3>Medical Supplies</h3>
+                <p>Critical medical deliveries with priority routing. Secure and sterile transport for pharmaceuticals and supplies.</p>
+            </div>
+            <div class="service-card">
+                <span class="service-icon">🎁</span>
+                <h3>Special Occasions</h3>
+                <p>Make birthdays and celebrations memorable with surprise deliveries. Gentle handling for fragile gifts.</p>
+            </div>
+            <div class="service-card">
+                <span class="service-icon">🌱</span>
+                <h3>Eco-Friendly</h3>
+                <p>Zero-emission deliveries powered by clean energy. Reduce your carbon footprint with every order.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="tracking" id="tracking">
+        <div class="tracking-container">
+            <h2 class="section-title">Track Your Delivery</h2>
+            <p>Enter your tracking number to see real-time location and estimated delivery time.</p>
+            
+            <div class="tracking-input">
+                <input type="text" placeholder="Enter tracking number (e.g., SD123456789)" id="trackingNumber">
+                <button class="btn btn-primary" onclick="trackPackage()">Track Package</button>
+            </div>
+
+            <div class="live-map" id="liveMap" style="display: none;">
+                <div class="delivery-path"></div>
+                <div class="map-drone"></div>
+                <div style="position: absolute; top: 10px; left: 20px; font-size: 0.9rem; opacity: 0.8;">
+                    📍 Live Tracking: Drone en route
+                </div>
+                <div style="position: absolute; bottom: 10px; right: 20px; font-size: 0.9rem; opacity: 0.8;">
+                    ETA: 12 minutes
+                </div>
+            </div>
+
+            <div id="trackingInfo" style="display: none; margin-top: 2rem; padding: 2rem; background: rgba(255, 255, 255, 0.1); border-radius: 15px; backdrop-filter: blur(20px);">
+                <h3>Package Status: In Transit</h3>
+                <p>Your package is currently being delivered by Drone Unit #247</p>
+                <p><strong>Estimated Arrival:</strong> 12 minutes</p>
+                <p><strong>Current Location:</strong> 2.3 km from destination</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats">
+        <h2 class="section-title">Delivery Excellence</h2>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number" data-target="50000">0</div>
+                <div class="stat-label">Successful Deliveries</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-target="15">0</div>
+                <div class="stat-label">Average Delivery Time (min)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-target="99">0</div>
+                <div class="stat-label">Success Rate (%)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-target="24">0</div>
+                <div class="stat-label">Hours Service</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Form Section -->
+    <section class="order-form" id="order">
+        <div class="order-container">
+            <h2 class="section-title">Place Your Order</h2>
+            <p>Quick and easy drone delivery in just a few clicks</p>
+            
+            <form class="delivery-form" id="deliveryForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="pickup">Pickup Address</label>
+                        <input type="text" id="pickup" placeholder="Enter pickup location" required>
+                        <span class="location-icon">📍</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="delivery">Delivery Address</label>
+                        <input type="text" id="delivery" placeholder="Enter delivery location" required>
+                        <span class="location-icon">🎯</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="package-type">Package Type</label>
+                        <select id="package-type" required>
+                            <option value="">Select package type</option>
+                            <option value="documents">Documents</option>
+                            <option value="food">Food & Beverages</option>
+                            <option value="electronics">Electronics</option>
+                            <option value="medical">Medical Supplies</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="weight">Package Weight</label>
+                        <select id="weight" required>
+                            <option value="">Select weight</option>
+                            <option value="0-1kg">0-1 kg ($5)</option>
+                            <option value="1-3kg">1-3 kg ($8)</option>
+                            <option value="3-5kg">3-5 kg ($12)</option>
+                            <option value="5-10kg">5-10 kg ($18)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="delivery-time">Delivery Speed</label>
+                        <select id="delivery-time" required>
+                            <option value="">Select delivery speed</option>
+                            <option value="express">Express (15-30 min) (+$10)</option>
+                            <option value="standard">Standard (1-2 hours) (+$0)</option>
+                            <option value="scheduled">Scheduled (+$2)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" placeholder="Your phone number" required>
+                    </div>
+                </div>
+                
+                <div class="price-calculator">
+                    <div class="price-breakdown">
+                        <div class="price-item">
+                            <span>Base Price:</span>
+                            <span id="basePrice">$0</span>
+                        </div>
+                        <div class="price-item">
+                            <span>Speed Surcharge:</span>
+                            <span id="speedPrice">$0</span>
+                        </div>
+                        <div class="price-item total">
+                            <span>Total:</span>
+                            <span id="totalPrice">$0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary order-btn">
+                    🚁 Schedule Delivery
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Live Fleet Section -->
+    <section class="fleet-status">
+        <div class="fleet-container">
+            <h2 class="section-title">Live Fleet Status</h2>
+            <p>Real-time monitoring of our drone delivery fleet</p>
+            
+            <div class="fleet-grid">
+                <div class="fleet-card active">
+                    <div class="drone-status-icon">🚁</div>
+                    <h3>Drone Alpha-7</h3>
+                    <div class="status-indicator online"></div>
+                    <p>Status: <span class="status-text">Delivering</span></p>
+                    <p>Battery: <span class="battery-level">85%</span></p>
+                    <p>ETA: 8 minutes</p>
+                    <div class="battery-bar">
+                        <div class="battery-fill" style="width: 85%"></div>
+                    </div>
+                </div>
+                
+                <div class="fleet-card">
+                    <div class="drone-status-icon">🚁</div>
+                    <h3>Drone Beta-3</h3>
+                    <div class="status-indicator online"></div>
+                    <p>Status: <span class="status-text">Available</span></p>
+                    <p>Battery: <span class="battery-level">92%</span></p>
+                    <p>Location: Hub Station</p>
+                    <div class="battery-bar">
+                        <div class="battery-fill" style="width: 92%"></div>
+                    </div>
+                </div>
+                
+                <div class="fleet-card">
+                    <div class="drone-status-icon">🚁</div>
+                    <h3>Drone Gamma-1</h3>
+                    <div class="status-indicator charging"></div>
+                    <p>Status: <span class="status-text">Charging</span></p>
+                    <p>Battery: <span class="battery-level">45%</span></p>
+                    <p>Available in: 15 min</p>
+                    <div class="battery-bar">
+                        <div class="battery-fill charging-animation" style="width: 45%"></div>
+                    </div>
+                </div>
+                
+                <div class="fleet-card">
+                    <div class="drone-status-icon">🚁</div>
+                    <h3>Drone Delta-5</h3>
+                    <div class="status-indicator online"></div>
+                    <p>Status: <span class="status-text">En Route</span></p>
+                    <p>Battery: <span class="battery-level">76%</span></p>
+                    <p>ETA: 12 minutes</p>
+                    <div class="battery-bar">
+                        <div class="battery-fill" style="width: 76%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="fleet-stats">
+                <div class="fleet-stat">
+                    <span class="stat-icon">🚁</span>
+                    <span class="stat-value">12</span>
+                    <span class="stat-label">Active Drones</span>
+                </div>
+                <div class="fleet-stat">
+                    <span class="stat-icon">⚡</span>
+                    <span class="stat-value">8</span>
+                    <span class="stat-label">Deliveries in Progress</span>
+                </div>
+                <div class="fleet-stat">
+                    <span class="stat-icon">🔋</span>
+                    <span class="stat-value">78%</span>
+                    <span class="stat-label">Avg Battery Level</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#terms">Terms of Service</a>
+                <a href="#support">Support</a>
+                <a href="#careers">Careers</a>
+                <a href="#press">Press</a>
+            </div>
+            <p>&copy; 2024 SkyDrop. All rights reserved. Revolutionizing delivery, one flight at a time.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Package tracking simulation
+        function trackPackage() {
+            const trackingNumber = document.getElementById('trackingNumber').value;
+            const liveMap = document.getElementById('liveMap');
+            const trackingInfo = document.getElementById('trackingInfo');
+            
+            if (trackingNumber.length > 0) {
+                liveMap.style.display = 'block';
+                trackingInfo.style.display = 'block';
+                
+                // Animate tracking info appearance
+                trackingInfo.style.opacity = '0';
+                trackingInfo.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    trackingInfo.style.transition = 'all 0.5s ease';
+                    trackingInfo.style.opacity = '1';
+                    trackingInfo.style.transform = 'translateY(0)';
+                }, 100);
+                
+                // Simulate real-time updates
+                simulateDeliveryUpdates();
+            }
+        }
+
+        function simulateDeliveryUpdates() {
+            const updates = [
+                { time: 3000, eta: '9 minutes', location: '1.8 km from destination' },
+                { time: 6000, eta: '6 minutes', location: '1.2 km from destination' },
+                { time: 9000, eta: '3 minutes', location: '0.5 km from destination' },
+                { time: 12000, eta: 'Delivered!', location: 'Package delivered successfully' }
+            ];
+
+            updates.forEach(update => {
+                setTimeout(() => {
+                    const etaElement = document.querySelector('#trackingInfo p:nth-child(3)');
+                    const locationElement = document.querySelector('#trackingInfo p:nth-child(4)');
+                    
+                    if (etaElement && locationElement) {
+                        etaElement.innerHTML = `<strong>Estimated Arrival:</strong> ${update.eta}`;
+                        locationElement.innerHTML = `<strong>Current Location:</strong> ${update.location}`;
+                        
+                        if (update.eta === 'Delivered!') {
+                            document.querySelector('#trackingInfo h3').textContent = 'Package Status: Delivered';
+                            document.querySelector('#trackingInfo h3').style.color = '#4CAF50';
+                        }
+                    }
+                }, update.time);
+            });
+        }
+
+        // Order form functionality
+        function calculatePrice() {
+            const weight = document.getElementById('weight').value;
+            const deliveryTime = document.getElementById('delivery-time').value;
+            
+            let basePrice = 0;
+            let speedPrice = 0;
+            
+            // Base price calculation
+            switch(weight) {
+                case '0-1kg': basePrice = 5; break;
+                case '1-3kg': basePrice = 8; break;
+                case '3-5kg': basePrice = 12; break;
+                case '5-10kg': basePrice = 18; break;
+            }
+            
+            // Speed surcharge calculation
+            switch(deliveryTime) {
+                case 'express': speedPrice = 10; break;
+                case 'standard': speedPrice = 0; break;
+                case 'scheduled': speedPrice = 2; break;
+            }
+            
+            document.getElementById('basePrice').textContent = `${basePrice}`;
+            document.getElementById('speedPrice').textContent = `${speedPrice}`;
+            document.getElementById('totalPrice').textContent = `${basePrice + speedPrice}`;
+        }
+
+        // Add event listeners for price calculation
+        document.addEventListener('DOMContentLoaded', function() {
+            const weightSelect = document.getElementById('weight');
+            const deliveryTimeSelect = document.getElementById('delivery-time');
+            
+            if (weightSelect && deliveryTimeSelect) {
+                weightSelect.addEventListener('change', calculatePrice);
+                deliveryTimeSelect.addEventListener('change', calculatePrice);
+            }
+            
+            // Form submission
+            const deliveryForm = document.getElementById('deliveryForm');
+            if (deliveryForm) {
+                deliveryForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Simulate order processing
+                    const orderBtn = document.querySelector('.order-btn');
+                    const originalText = orderBtn.textContent;
+                    
+                    orderBtn.textContent = '⏳ Processing...';
+                    orderBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        orderBtn.textContent = '✅ Order Confirmed!';
+                        orderBtn.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+                        
+                        // Show success message
+                        showOrderConfirmation();
+                        
+                        setTimeout(() => {
+                            orderBtn.textContent = originalText;
+                            orderBtn.disabled = false;
+                            orderBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                        }, 3000);
+                    }, 2000);
+                });
+            }
+        });
+
+        function showOrderConfirmation() {
+            const confirmation = document.createElement('div');
+            confirmation.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #4CAF50, #45a049);
+                color: white;
+                padding: 2rem 3rem;
+                border-radius: 15px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                z-index: 10000;
+                text-align: center;
+                animation: confirmationSlide 0.5s ease;
+            `;
+            
+            confirmation.innerHTML = `
+                <h3 style="margin-bottom: 1rem;">🎉 Order Confirmed!</h3>
+                <p>Tracking ID: SD${Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+                <p>Estimated delivery: 25-30 minutes</p>
+                <p>You'll receive SMS updates on your phone</p>
+            `;
+            
+            document.body.appendChild(confirmation);
+            
+            setTimeout(() => {
+                confirmation.remove();
+            }, 4000);
+        }
+
+        // Fleet status updates
+        function updateFleetStatus() {
+            const fleetCards = document.querySelectorAll('.fleet-card');
+            const batteryLevels = document.querySelectorAll('.battery-level');
+            const batteryFills = document.querySelectorAll('.battery-fill');
+            
+            fleetCards.forEach((card, index) => {
+                const currentBattery = parseInt(batteryLevels[index].textContent);
+                const isCharging = card.querySelector('.status-indicator').classList.contains('charging');
+                
+                if (isCharging && currentBattery < 95) {
+                    const newLevel = Math.min(currentBattery + Math.floor(Math.random() * 3) + 1, 100);
+                    batteryLevels[index].textContent = `${newLevel}%`;
+                    batteryFills[index].style.width = `${newLevel}%`;
+                    
+                    if (newLevel >= 95) {
+                        card.querySelector('.status-indicator').classList.remove('charging');
+                        card.querySelector('.status-indicator').classList.add('online');
+                        card.querySelector('.status-text').textContent = 'Available';
+                        batteryFills[index].classList.remove('charging-animation');
+                    }
+                }
+            });
+        }
+
+        // Update fleet status every 5 seconds
+        setInterval(updateFleetStatus, 5000);
+
+        // Animated counters for stats
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stat-number');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const increment = target / 100;
+                let current = 0;
+                
+                const updateCounter = () => {
+                    if (current < target) {
+                        current += increment;
+                        counter.textContent = Math.floor(current);
+                        setTimeout(updateCounter, 20);
+                    } else {
+                        counter.textContent = target;
+                    }
+                };
+                
+                updateCounter();
+            });
+        }
+
+        // Intersection Observer for stats animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        observer.observe(document.querySelector('.stats'));
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add some interactive hover effects
+        document.querySelectorAll('.service-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Easter egg: Konami code for special drone animation
+        let konamiCode = [];
+        const konamiSequence = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+
+        document.addEventListener('keydown', (e) => {
+            konamiCode.push(e.keyCode);
+            if (konamiCode.length > konamiSequence.length) {
+                konamiCode.shift();
+            }
+            
+            if (JSON.stringify(konamiCode) === JSON.stringify(konamiSequence)) {
+                triggerSpecialAnimation();
+                konamiCode = [];
+            }
+        });
+
+        function triggerSpecialAnimation() {
+            const specialDrone = document.createElement('div');
+            specialDrone.innerHTML = '🚁';
+            specialDrone.style.position = 'fixed';
+            specialDrone.style.fontSize = '3rem';
+            specialDrone.style.zIndex = '9999';
+            specialDrone.style.left = '-100px';
+            specialDrone.style.top = '50%';
+            specialDrone.style.animation = 'specialFly 3s ease-in-out';
+            
+            document.body.appendChild(specialDrone);
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes specialFly {
+                    0% { left: -100px; transform: rotate(0deg); }
+                    50% { left: 50%; transform: rotate(360deg) scale(1.5); }
+                    100% { left: calc(100% + 100px); transform: rotate(720deg); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            setTimeout(() => {
+                specialDrone.remove();
+                style.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
