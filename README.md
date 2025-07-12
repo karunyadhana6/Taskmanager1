@@ -1,1 +1,1 @@
-View the PowerPoint presentation](./Skydrop.pptx)
+[View the PowerPoint presentation](./Skydrop.pptx)
