@@ -1,4 +1,4 @@
-SkyDrop — an advanced, futuristic drone delivery service website and discussion for Human Centered Artificial Intelligence.
+Project 1 : SkyDrop — an advanced, futuristic drone delivery service website and discussion for Human Centered Artificial Intelligence.
 
 I designed and developed this dynamic, fully animated web experience to demonstrate the future of fast, eco-friendly deliveries. From real-time order tracking with live drone animations to a smart price calculator and an interactive fleet status dashboard, SkyDrop provides a seamless and engaging user journey.
 
