@@ -9,6 +9,7 @@ Key features include:
 ✅ Fleet monitoring section showing active drones and battery statuses.
 ✅ Clean, modern UI with gradient text effects, hover interactions, and smooth scrolling for an immersive feel.
 
+
 This project combines HTML, CSS, and JavaScript with advanced animations and interaction logic, showcasing how technology can revolutionise last-mile delivery experiences.
 
 Presentation : 
