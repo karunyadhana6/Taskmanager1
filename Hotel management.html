@@ -1,0 +1,3630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxury Haven Hotel - Booking System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 25%, #8b5cf6 50%, #6b7280 75%, #374151 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .screen {
+            display: none;
+            background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.1);
+            animation: slideIn 0.6s ease-out;
+            min-height: 80vh;
+            overflow: hidden;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 25%, #8b5cf6 50%, #6b7280 75%, #374151 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 10s ease infinite;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 0 30px;
+        }
+        
+        .nav-tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-tab.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+        }
+        
+        .nav-tab:hover {
+            color: #4f46e5;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        /* Welcome Page Styles */
+        .welcome-content {
+            text-align: center;
+            padding: 60px 40px;
+        }
+        
+        .welcome-hero {
+            margin-bottom: 50px;
+        }
+        
+        .welcome-hero h2 {
+            font-size: 3rem;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .welcome-hero p {
+            font-size: 1.2rem;
+            color: #666;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .booking-form {
+            background: linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(248,249,250,0.9) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input, .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 50%, #6b7280 100%);
+            background-size: 200% 200%;
+            animation: gradientPulse 3s ease infinite;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+        
+        @keyframes gradientPulse {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(79, 70, 229, 0.4);
+            animation-duration: 1.5s;
+        }
+        
+        /* Room Selection Styles */
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .room-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .room-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+        
+        .room-card.selected {
+            border: 2px solid #4f46e5;
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(79, 70, 229, 0.2);
+        }
+        
+        .room-image {
+            height: 200px;
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 25%, #8b5cf6 50%, #6b7280 75%, #374151 100%);
+            background-size: 300% 300%;
+            animation: gradientShift 8s ease infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .room-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.1);
+            backdrop-filter: blur(1px);
+        }
+        
+        .room-info {
+            padding: 25px;
+        }
+        
+        .room-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .room-features {
+            list-style: none;
+            margin: 15px 0;
+        }
+        
+        .room-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            color: #666;
+        }
+        
+        .room-features i {
+            color: #4f46e5;
+            width: 16px;
+            text-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+        }
+        
+        .availability-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+            z-index: 10;
+        }
+        
+        .availability-badge.low-stock {
+            background: linear-gradient(45deg, #e67e22, #f39c12);
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+        }
+        
+        .availability-badge.out-of-stock {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+        
+        .room-price {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 15px;
+        }
+        
+        /* Smart Control & Automation Dashboard */
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        
+        .control-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .control-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border-color: rgba(79, 70, 229, 0.4);
+        }
+        
+        .control-icon {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+        }
+        
+        .control-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .control-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e9ecef;
+            outline: none;
+            margin: 15px 0;
+        }
+        
+        .control-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 10px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #ccc;
+            border-radius: 15px;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle-switch.on {
+            background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+        
+        .toggle-switch.on::after {
+            transform: translateX(30px);
+        }
+        
+        /* Smart Room AI Controls */
+        .beverage-selector {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+            font-size: 0.9rem;
+            color: #333;
+            margin: 10px 0;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .beverage-selector:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .restaurant-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
+            background-size: 200% 200%;
+            animation: gradientPulse 4s ease infinite;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+        
+        .restaurant-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+            animation-duration: 2s;
+        }
+        
+        .restaurant-btn:first-of-type {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .restaurant-btn:first-of-type:hover {
+            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        /* Concierge Button Styles */
+        .concierge-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            background: linear-gradient(45deg, #17a2b8, #138496);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .concierge-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(23, 162, 184, 0.3);
+        }
+        
+        .concierge-btn:first-of-type {
+            background: linear-gradient(45deg, #6366f1, #4f46e5);
+        }
+        
+        .concierge-btn:first-of-type:hover {
+            box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3);
+        }
+        
+        /* Messaging Styles */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            display: flex;
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+        }
+        
+        .message.staff .message-content {
+            background: #2c3e50;
+            color: white;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message.user .message-content {
+            background: #e9ecef;
+            color: #333;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            margin-right: 10px;
+            outline: none;
+        }
+        
+        .chat-input button {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        /* Billing Styles */
+        .billing-summary {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .bill-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .bill-row:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #2c3e50;
+        }
+        
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .payment-card {
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .payment-card:hover, .payment-card.selected {
+            border-color: #2c3e50;
+            background: rgba(44, 62, 80, 0.1);
+        }
+        
+        .payment-icon {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Automation Styles */
+        .automation-category {
+            background: linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(248,249,250,0.9) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .automation-category h4 {
+            background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .automation-item {
+            background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+            border-image: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%) 1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .automation-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            border-left-width: 6px;
+        }
+        
+        .automation-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .status-badge {
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-left: auto;
+        }
+        
+        .status-badge.pending {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .automation-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .automation-stats span {
+            color: #28a745;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .smart-automation-panel {
+            background: linear-gradient(135deg, #6b7280 0%, #374151 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            color: white;
+        }
+        
+        .smart-automation-panel h4 {
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .automation-scenarios {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .scenario-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .scenario-card:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-3px);
+        }
+        
+        .scenario-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        
+        .scenario-card h5 {
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .scenario-card p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .scenario-status {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .automation-analytics {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .automation-analytics h4 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-top: 4px solid #2c3e50;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .metric-change {
+            color: #28a745;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        /* Voice Control Styles */
+        .voice-control-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 50%, #6b7280 100%);
+            background-size: 300% 300%;
+            animation: gradientPulse 3s ease infinite;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .voice-control-button:hover {
+            transform: scale(1.15);
+            box-shadow: 0 15px 40px rgba(79, 70, 229, 0.5);
+            animation-duration: 1.5s;
+        }
+        
+        .voice-control-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(79, 70, 229, 0.4);
+        }
+        
+        .voice-control-button.listening {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 50%, #f39c12 100%);
+            background-size: 300% 300%;
+            animation: gradientPulse 1s ease infinite, pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+        
+        .voice-status {
+            position: fixed;
+            bottom: 120px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            display: none;
+            z-index: 1001;
+            max-width: 300px;
+            text-align: center;
+        }
+        
+        .voice-commands-help {
+            position: fixed;
+            bottom: 170px;
+            right: 30px;
+            background: white;
+            border: 2px solid #2c3e50;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1002;
+            max-width: 350px;
+            font-size: 0.85rem;
+        }
+        
+        .voice-commands-help h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .voice-commands-help ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .voice-commands-help li {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .voice-commands-help li:last-child {
+            border-bottom: none;
+        }
+        
+        .voice-commands-help .command {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .voice-commands-help .description {
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        /* Kiosk Styles */
+        .kiosk-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .kiosk-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .kiosk-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        
+        .kiosk-header h3 {
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+        
+        .booking-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .info-card i {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .info-card h4 {
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .info-card p {
+            color: #666;
+            margin: 0;
+        }
+        
+        .time-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .time-remaining {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #28a745;
+        }
+        
+        .time-remaining.warning {
+            color: #ffc107;
+        }
+        
+        .time-remaining.critical {
+            color: #dc3545;
+        }
+        
+        .extend-stay {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .extend-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .extend-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .final-bill {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+        
+        .checkout-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+        
+        .action-btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .action-btn.checkout {
+            background: #28a745;
+            color: white;
+        }
+        
+        .action-btn.checkout:hover {
+            background: #218838;
+        }
+        
+        .action-btn.emergency {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .action-btn.emergency:hover {
+            background: #c82333;
+        }
+        
+        .status-indicator {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+        
+        .status-indicator.active {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-indicator.expired {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .deactivation-countdown {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            border: 1px solid #ffeaa7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .welcome-hero h2 { font-size: 2rem; }
+            .form-row { grid-template-columns: 1fr; }
+            .nav-tabs { flex-wrap: wrap; }
+            .nav-tab { padding: 10px 15px; font-size: 0.9rem; }
+            .automation-scenarios { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .analytics-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .voice-control-button { bottom: 20px; right: 20px; width: 60px; height: 60px; }
+            .voice-status { bottom: 90px; right: 20px; }
+            .voice-commands-help { bottom: 140px; right: 20px; max-width: 280px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="screen active" id="welcome-screen">
+            <div class="header">
+                <h1><i class="fas fa-hotel"></i> Luxury Haven Hotel</h1>
+                <p>Experience comfort and luxury like never before</p>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showScreen('welcome')">
+                    <i class="fas fa-home"></i> Welcome
+                </button>
+                <button class="nav-tab" onclick="showScreen('rooms')">
+                    <i class="fas fa-bed"></i> Rooms
+                </button>
+                <button class="nav-tab" onclick="showScreen('automation')">
+                    <i class="fas fa-robot"></i> Smart Control & Automation
+                </button>
+                <button class="nav-tab" onclick="showScreen('messaging')">
+                    <i class="fas fa-comments"></i> Support
+                </button>
+                <button class="nav-tab" onclick="showScreen('billing')">
+                    <i class="fas fa-receipt"></i> Checkout
+                </button>
+                <button class="nav-tab" onclick="showScreen('kiosk')">
+                    <i class="fas fa-credit-card"></i> Kiosk
+                </button>
+            </div>
+            
+            <div class="welcome-content">
+                <div class="welcome-hero">
+                    <h2>Welcome to Your Perfect Stay</h2>
+                    <p>Book your dream room with our state-of-the-art booking system. Enjoy smart room controls, 24/7 support, and seamless checkout experience.</p>
+                </div>
+                
+                <div class="booking-form">
+                    <h3 style="margin-bottom: 30px; color: #333;">Find Your Perfect Room</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Check-in Date</label>
+                            <input type="date" id="checkin" value="2025-07-15">
+                        </div>
+                        <div class="form-group">
+                            <label>Check-out Date</label>
+                            <input type="date" id="checkout" value="2025-07-17">
+                        </div>
+                        <div class="form-group">
+                            <label>Guests</label>
+                            <select id="guests">
+                                <option value="1">1 Guest</option>
+                                <option value="2" selected>2 Guests</option>
+                                <option value="3">3 Guests</option>
+                                <option value="4">4 Guests</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Room Type</label>
+                            <select id="roomType">
+                                <option value="any">Any Room</option>
+                                <option value="standard">Standard</option>
+                                <option value="deluxe">Deluxe</option>
+                                <option value="suite">Suite</option>
+                                <option value="ai-room">Complete AI Room</option>
+                                <option value="senior-assisted">Senior Assisted Room</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="showScreen('rooms')">
+                        <i class="fas fa-search"></i> Search Available Rooms
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="rooms-screen">
+            <div class="header">
+                <h1><i class="fas fa-bed"></i> Select Your Room</h1>
+                <p>Choose from our premium collection of rooms</p>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab" onclick="showScreen('welcome')">
+                    <i class="fas fa-home"></i> Welcome
+                </button>
+                <button class="nav-tab active" onclick="showScreen('rooms')">
+                    <i class="fas fa-bed"></i> Rooms
+                </button>
+                <button class="nav-tab" onclick="showScreen('automation')">
+                    <i class="fas fa-robot"></i> Smart Control & Automation
+                </button>
+                <button class="nav-tab" onclick="showScreen('messaging')">
+                    <i class="fas fa-comments"></i> Support
+                </button>
+                <button class="nav-tab" onclick="showScreen('billing')">
+                    <i class="fas fa-receipt"></i> Checkout
+                </button>
+                <button class="nav-tab" onclick="showScreen('kiosk')">
+                    <i class="fas fa-credit-card"></i> Kiosk
+                </button>
+            </div>
+            
+            <div class="content">
+                <div class="room-grid">
+                    <div class="room-card" onclick="selectRoom(this, 'Standard King Room', 120)">
+                        <div class="room-image">
+                            <i class="fas fa-bed"></i>
+                            <div class="availability-badge">8 Available</div>
+                        </div>
+                        <div class="room-info">
+                            <div class="room-title">Standard King Room</div>
+                            <ul class="room-features">
+                                <li><i class="fas fa-wifi"></i> Free WiFi</li>
+                                <li><i class="fas fa-tv"></i> 42" Smart TV</li>
+                                <li><i class="fas fa-wind"></i> Air Conditioning</li>
+                                <li><i class="fas fa-coffee"></i> Coffee Maker</li>
+                                <li><i class="fas fa-bath"></i> Private Bathroom</li>
+                            </ul>
+                            <div class="room-price">$120<span style="font-size: 0.6em; color: #666;">/night</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="room-card" onclick="selectRoom(this, 'Deluxe Suite', 200)">
+                        <div class="room-image">
+                            <i class="fas fa-crown"></i>
+                            <div class="availability-badge">5 Available</div>
+                        </div>
+                        <div class="room-info">
+                            <div class="room-title">Deluxe Suite</div>
+                            <ul class="room-features">
+                                <li><i class="fas fa-wifi"></i> Free WiFi</li>
+                                <li><i class="fas fa-tv"></i> 55" Smart TV</li>
+                                <li><i class="fas fa-hot-tub"></i> Jacuzzi</li>
+                                <li><i class="fas fa-glass-cheers"></i> Mini Bar</li>
+                                <li><i class="fas fa-eye"></i> City View</li>
+                            </ul>
+                            <div class="room-price">$200<span style="font-size: 0.6em; color: #666;">/night</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="room-card" onclick="selectRoom(this, 'Presidential Suite', 350)">
+                        <div class="room-image">
+                            <i class="fas fa-gem"></i>
+                            <div class="availability-badge">2 Available</div>
+                        </div>
+                        <div class="room-info">
+                            <div class="room-title">Presidential Suite</div>
+                            <ul class="room-features">
+                                <li><i class="fas fa-wifi"></i> Free WiFi</li>
+                                <li><i class="fas fa-tv"></i> 65" Smart TV</li>
+                                <li><i class="fas fa-utensils"></i> Kitchen</li>
+                                <li><i class="fas fa-swimmer"></i> Pool Access</li>
+                                <li><i class="fas fa-concierge-bell"></i> Butler Service</li>
+                            </ul>
+                            <div class="room-price">$350<span style="font-size: 0.6em; color: #666;">/night</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="room-card" onclick="selectRoom(this, 'Complete AI Room', 450)">
+                        <div class="room-image">
+                            <i class="fas fa-robot"></i>
+                            <div class="availability-badge">3 Available</div>
+                        </div>
+                        <div class="room-info">
+                            <div class="room-title">Complete AI Room</div>
+                            <ul class="room-features">
+                                <li><i class="fas fa-brain"></i> AI Personal Assistant</li>
+                                <li><i class="fas fa-eye"></i> Facial Recognition Entry</li>
+                                <li><i class="fas fa-microphone"></i> Voice Controlled Everything</li>
+                                <li><i class="fas fa-chart-line"></i> Predictive Comfort Settings</li>
+                                <li><i class="fas fa-magic"></i> Automated Room Service</li>
+                            </ul>
+                            <div class="room-price">$450<span style="font-size: 0.6em; color: #666;">/night</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="room-card" onclick="selectRoom(this, 'Senior Assisted Room', 280)">
+                        <div class="room-image">
+                            <i class="fas fa-heart"></i>
+                            <div class="availability-badge">4 Available</div>
+                        </div>
+                        <div class="room-info">
+                            <div class="room-title">Senior Assisted Room</div>
+                            <ul class="room-features">
+                                <li><i class="fas fa-ambulance"></i> 24/7 Health Monitoring</li>
+                                <li><i class="fas fa-wheelchair"></i> Accessibility Features</li>
+                                <li><i class="fas fa-pills"></i> Medication Reminders</li>
+                                <li><i class="fas fa-phone-volume"></i> Emergency Call System</li>
+                                <li><i class="fas fa-user-md"></i> Nurse Call Button</li>
+                            </ul>
+                            <div class="room-price">$280<span style="font-size: 0.6em; color: #666;">/night</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn-primary" onclick="bookRoom()" id="bookBtn" style="display: none;">
+                        <i class="fas fa-check"></i> Confirm Booking
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="automation-screen">
+            <div class="header">
+                <h1><i class="fas fa-robot"></i> Hotel Automation Hub</h1>
+                <p>Advanced automation systems powering seamless hotel operations and guest experiences</p>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab" onclick="showScreen('welcome')">
+                    <i class="fas fa-home"></i> Welcome
+                </button>
+                <button class="nav-tab" onclick="showScreen('rooms')">
+                    <i class="fas fa-bed"></i> Rooms
+                </button>
+                <button class="nav-tab active" onclick="showScreen('automation')">
+                    <i class="fas fa-robot"></i> Smart Control & Automation
+                </button>
+                <button class="nav-tab" onclick="showScreen('messaging')">
+                    <i class="fas fa-comments"></i> Support
+                </button>
+                <button class="nav-tab" onclick="showScreen('billing')">
+                    <i class="fas fa-receipt"></i> Checkout
+                </button>
+                <button class="nav-tab" onclick="showScreen('kiosk')">
+                    <i class="fas fa-credit-card"></i> Kiosk
+                </button>
+            </div>
+            
+            <div class="content">
+                <h3 style="margin-bottom: 30px; color: #333; text-align: center;">Hotel Automation & Smart Control Hub</h3>
+                
+                <!-- Smart Room Controls Section -->
+                <div style="background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); border-radius: 15px; padding: 25px; margin-bottom: 30px; color: white;">
+                    <h4 style="margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-cog"></i> Smart Room Controls
+                    </h4>
+                    <div class="control-grid">
+                        <div class="control-card">
+                            <div class="control-icon">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                            <div class="control-title">Temperature</div>
+                            <input type="range" class="control-slider" min="16" max="30" value="22" oninput="updateTemp(this.value)">
+                            <div class="control-value" id="tempValue">22°C</div>
+                        </div>
+                        
+                        <div class="control-card">
+                            <div class="control-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="control-title">Lighting</div>
+                            <input type="range" class="control-slider" min="0" max="100" value="75" oninput="updateBrightness(this.value)">
+                            <div class="control-value" id="brightnessValue">75%</div>
+                        </div>
+                        
+                        <div class="control-card">
+                            <div class="control-icon">
+                                <i class="fas fa-tv"></i>
+                            </div>
+                            <div class="control-title">Television</div>
+                            <div class="toggle-switch on" onclick="toggleTV(this)"></div>
+                            <div class="control-value">ON</div>
+                        </div>
+                        
+                        <div class="control-card">
+                            <div class="control-icon">
+                                <i class="fas fa-volume-up"></i>
+                            </div>
+                            <div class="control-title">Music Volume</div>
+                            <input type="range" class="control-slider" min="0" max="100" value="45" oninput="updateVolume(this.value)">
+                            <div class="control-value" id="volumeValue">45%</div>
+                        </div>
+                        
+                        <div class="control-card">
+                            <div class="control-icon">
+                                <i class="fas fa-wind"></i>
+                            </div>
+                            <div class="control-title">Air Conditioning</div>
+                            <div class="toggle-switch on" onclick="toggleAC(this)"></div>
+                            <div class="control-value">ON</div>
+                        </div>
+                        
+                        <div class="control-card">
+                            <div class="control-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="control-title">Do Not Disturb</div>
+                            <div class="toggle-switch" onclick="toggleDND(this)"></div>
+                            <div class="control-value">OFF</div>
+                        </div>
+                        
+                        <div class="control-card">
+                            <div class="control-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div class="control-title">Quick Meals</div>
+                            <select class="meal-selector" onchange="orderQuickMeal(this.value)">
+                                <option value="">Select Meal</option>
+                                <option value="breakfast">Quick Breakfast - $18</option>
+                                <option value="lunch">Quick Lunch - $25</option>
+                                <option value="dinner">Quick Dinner - $35</option>
+                            </select>
+                            <div class="control-value" id="mealStatus">Ready to Order</div>
+                        </div>
+                        
+                        <div class="control-card">
+                            <div class="control-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div class="control-title">Restaurant Orders</div>
+                            <button class="restaurant-btn" onclick="openRestaurantMenu()">
+                                <i class="fas fa-book-open"></i> View Menu
+                            </button>
+                            <button class="restaurant-btn" onclick="quickOrder()">
+                                <i class="fas fa-bolt"></i> Quick Order
+                            </button>
+                            <div class="control-value" id="orderStatus">No Active Orders</div>
+                        </div>
+                        
+                        <div class="control-card">
+                            <div class="control-icon">
+                                <i class="fas fa-concierge-bell"></i>
+                            </div>
+                            <div class="control-title">Concierge Services</div>
+                            <button class="concierge-btn" onclick="openConciergeServices()">
+                                <i class="fas fa-hands-helping"></i> Request Service
+                            </button>
+                            <button class="concierge-btn" onclick="contactConcierge()">
+                                <i class="fas fa-phone"></i> Call Concierge
+                            </button>
+                            <div class="control-value" id="conciergeStatus">Available 24/7</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Automation Categories -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    
+                    <!-- Guest Experience Automation -->
+                    <div class="automation-category">
+                        <h4><i class="fas fa-user-check"></i> Guest Experience</h4>
+                        
+                        <div class="automation-item">
+                            <div class="automation-header">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>Smart Check-in</span>
+                                <span class="status-badge active">Active</span>
+                            </div>
+                            <p>Automated mobile check-in with digital room keys sent to guest's smartphone</p>
+                            <div class="automation-stats">
+                                <span>✓ Reduces wait time by 85%</span>
+                                <span>✓ 24/7 availability</span>
+                            </div>
+                        </div>
+                        
+                        <div class="automation-item">
+                            <div class="automation-header">
+                                <i class="fas fa-concierge-bell"></i>
+                                <span>AI Concierge</span>
+                                <span class="status-badge active">Active</span>
+                            </div>
+                            <p>Intelligent chatbot provides instant answers to guest queries and recommendations</p>
+                            <div class="automation-stats">
+                                <span>✓ 95% query resolution</span>
+                                <span>✓ Multi-language support</span>
+                            </div>
+                        </div>
+                        
+                        <div class="automation-item">
+                            <div class="automation-header">
+                                <i class="fas fa-utensils"></i>
+                                <span>Smart Dining</span>
+                                <span class="status-badge pending">Scheduled</span>
+                            </div>
+                            <p>Automated room service ordering based on guest preferences and dietary restrictions</p>
+                            <div class="automation-stats">
+                                <span>✓ Personalized menus</span>
+                                <span>✓ Allergy alerts</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Operations Automation -->
+                    <div class="automation-category">
+                        <h4><i class="fas fa-cogs"></i> Operations</h4>
+                        
+                        <div class="automation-item">
+                            <div class="automation-header">
+                                <i class="fas fa-broom"></i>
+                                <span>Housekeeping Scheduler</span>
+                                <span class="status-badge active">Active</span>
+                            </div>
+                            <p>AI-powered cleaning schedule optimization based on occupancy and guest checkout times</p>
+                            <div class="automation-stats">
+                                <span>✓ 30% efficiency increase</span>
+                                <span>✓ Real-time updates</span>
+                            </div>
+                        </div>
+                        
+                        <div class="automation-item">
+                            <div class="automation-header">
+                                <i class="fas fa-tools"></i>
+                                <span>Predictive Maintenance</span>
+                                <span class="status-badge active">Active</span>
+                            </div>
+                            <p>IoT sensors monitor equipment health and predict maintenance needs before failures</p>
+                            <div class="automation-stats">
+                                <span>✓ 70% downtime reduction</span>
+                                <span>✓ Cost savings: $50K/year</span>
+                            </div>
+                        </div>
+                        
+                        <div class="automation-item">
+                            <div class="automation-header">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Revenue Optimization</span>
+                                <span class="status-badge active">Active</span>
+                            </div>
+                            <p>Dynamic pricing algorithms adjust room rates based on demand, events, and market conditions</p>
+                            <div class="automation-stats">
+                                <span>✓ 15% revenue increase</span>
+                                <span>✓ Real-time adjustments</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Security & Safety -->
+                    <div class="automation-category">
+                        <h4><i class="fas fa-shield-alt"></i> Security & Safety</h4>
+                        
+                        <div class="automation-item">
+                            <div class="automation-header">
+                                <i class="fas fa-key"></i>
+                                <span>Digital Access Control</span>
+                                <span class="status-badge active">Active</span>
+                            </div>
+                            <p>Keyless entry system with mobile keys and access logging for enhanced security</p>
+                            <div class="automation-stats">
+                                <span>✓ Zero lost keys</span>
+                                <span>✓ Complete audit trail</span>
+                            </div>
+                        </div>
+                        
+                        <div class="automation-item">
+                            <div class="automation-header">
+                                <i class="fas fa-video"></i>
+                                <span>AI Security Monitoring</span>
+                                <span class="status-badge active">Active</span>
+                            </div>
+                            <p>Computer vision detects unusual activities and automatically alerts security personnel</p>
+                            <div class="automation-stats">
+                                <span>✓ 99.9% accuracy</span>
+                                <span>✓ Instant alerts</span>
+                            </div>
+                        </div>
+                        
+                        <div class="automation-item">
+                            <div class="automation-header">
+                                <i class="fas fa-fire-extinguisher"></i>
+                                <span>Emergency Response</span>
+                                <span class="status-badge active">Active</span>
+                            </div>
+                            <p>Automated fire/emergency detection with instant guest notifications and evacuation guidance</p>
+                            <div class="automation-stats">
+                                <span>✓ Sub-second detection</span>
+                                <span>✓ Automated guest alerts</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Smart Room Automation Controls -->
+                <div class="smart-automation-panel">
+                    <h4><i class="fas fa-home"></i> Smart Room Automation</h4>
+                    <div class="automation-scenarios">
+                        
+                        <div class="scenario-card" onclick="activateScenario('arrival')">
+                            <div class="scenario-icon">
+                                <i class="fas fa-door-open"></i>
+                            </div>
+                            <h5>Guest Arrival</h5>
+                            <p>Auto-adjust temperature, lighting, and music when guest enters</p>
+                            <div class="scenario-status">Ready</div>
+                        </div>
+                        
+                        <div class="scenario-card" onclick="activateScenario('morning')">
+                            <div class="scenario-icon">
+                                <i class="fas fa-sun"></i>
+                            </div>
+                            <h5>Good Morning</h5>
+                            <p>Gradual lighting, curtains open, news briefing, coffee ready</p>
+                            <div class="scenario-status">Scheduled 7:00 AM</div>
+                        </div>
+                        
+                        <div class="scenario-card" onclick="activateScenario('meeting')">
+                            <div class="scenario-icon">
+                                <i class="fas fa-briefcase"></i>
+                            </div>
+                            <h5>Business Mode</h5>
+                            <p>Optimal lighting for video calls, DND mode, productivity apps</p>
+                            <div class="scenario-status">Available</div>
+                        </div>
+                        
+                        <div class="scenario-card" onclick="activateScenario('sleep')">
+                            <div class="scenario-icon">
+                                <i class="fas fa-moon"></i>
+                            </div>
+                            <h5>Sleep Mode</h5>
+                            <p>Dim lights, lower temperature, white noise, blackout curtains</p>
+                            <div class="scenario-status">Auto at 10:00 PM</div>
+                        </div>
+                        
+                        <div class="scenario-card" onclick="activateScenario('away')">
+                            <div class="scenario-icon">
+                                <i class="fas fa-power-off"></i>
+                            </div>
+                            <h5>Away Mode</h5>
+                            <p>Energy saving mode, security activation, maintenance access</p>
+                            <div class="scenario-status">Auto-detect</div>
+                        </div>
+                        
+                        <div class="scenario-card" onclick="activateScenario('entertainment')">
+                            <div class="scenario-icon">
+                                <i class="fas fa-tv"></i>
+                            </div>
+                            <h5>Entertainment</h5>
+                            <p>Cinema lighting, surround sound, streaming services ready</p>
+                            <div class="scenario-status">Available</div>
+                        </div>
+                        
+                        <div class="scenario-card" onclick="activateScenario('cleaning')">
+                            <div class="scenario-icon">
+                                <i class="fas fa-broom"></i>
+                            </div>
+                            <h5>Room Cleaning</h5>
+                            <p>Automated robotic cleaning, UV sanitization, air purification</p>
+                            <div class="scenario-status">Schedule Available</div>
+                        </div>
+                        
+                        <div class="scenario-card" onclick="activateScenario('bedmaking')">
+                            <div class="scenario-icon">
+                                <i class="fas fa-bed"></i>
+                            </div>
+                            <h5>Bed Making</h5>
+                            <p>Automated bed making, fresh linens, pillow arrangement</p>
+                            <div class="scenario-status">Ready</div>
+                        </div>
+                        
+                        <div class="scenario-card" onclick="activateScenario('housekeeping')">
+                            <div class="scenario-icon">
+                                <i class="fas fa-concierge-bell"></i>
+                            </div>
+                            <h5>Housekeeping Services</h5>
+                            <p>Request fresh linens, minibar restock, amenities, and cleaning</p>
+                            <div class="scenario-status">Available</div>
+                        </div>
+                        
+                        <div class="scenario-card" onclick="activateScenario('coffee')">
+                            <div class="scenario-icon">
+                                <i class="fas fa-coffee"></i>
+                            </div>
+                            <h5>AI Coffee/Tea Maker</h5>
+                            <p>Prepare your perfect beverage with AI-powered precision</p>
+                            <div class="scenario-status">Ready</div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <!-- Automation Analytics -->
+                <div class="automation-analytics">
+                    <h4><i class="fas fa-analytics"></i> Automation Impact</h4>
+                    <div class="analytics-grid">
+                        <div class="metric-card">
+                            <div class="metric-value">92%</div>
+                            <div class="metric-label">Guest Satisfaction</div>
+                            <div class="metric-change">+8% this month</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value">$180K</div>
+                            <div class="metric-label">Annual Savings</div>
+                            <div class="metric-change">+$30K vs last year</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value">65%</div>
+                            <div class="metric-label">Process Automation</div>
+                            <div class="metric-change">+25% this quarter</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value">15min</div>
+                            <div class="metric-label">Avg Check-in Time</div>
+                            <div class="metric-change">-45min improvement</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="messaging-screen">
+            <div class="header">
+                <h1><i class="fas fa-comments"></i> Guest Support</h1>
+                <p>24/7 assistance at your service</p>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab" onclick="showScreen('welcome')">
+                    <i class="fas fa-home"></i> Welcome
+                </button>
+                <button class="nav-tab" onclick="showScreen('rooms')">
+                    <i class="fas fa-bed"></i> Rooms
+                </button>
+                <button class="nav-tab" onclick="showScreen('automation')">
+                    <i class="fas fa-robot"></i> Smart Control & Automation
+                </button>
+                <button class="nav-tab active" onclick="showScreen('messaging')">
+                    <i class="fas fa-comments"></i> Support
+                </button>
+                <button class="nav-tab" onclick="showScreen('billing')">
+                    <i class="fas fa-receipt"></i> Checkout
+                </button>
+                <button class="nav-tab" onclick="showScreen('kiosk')">
+                    <i class="fas fa-credit-card"></i> Kiosk
+                </button>
+            </div>
+            
+            <div class="content">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message staff">
+                            <div class="message-content">
+                                Welcome to Luxury Haven Hotel! I'm Sarah, your personal concierge. How can I assist you today?
+                            </div>
+                        </div>
+                        <div class="message user">
+                            <div class="message-content">
+                                Hi! Could you help me with room service?
+                            </div>
+                        </div>
+                        <div class="message staff">
+                            <div class="message-content">
+                                Absolutely! Our room service is available 24/7. What would you like to order? I can send you our digital menu.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" placeholder="Type your message..." id="messageInput" onkeypress="handleEnter(event)">
+                        <button onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="billing-screen">
+            <div class="header">
+                <h1><i class="fas fa-receipt"></i> Checkout & Billing</h1>
+                <p>Review your stay and complete payment</p>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab" onclick="showScreen('welcome')">
+                    <i class="fas fa-home"></i> Welcome
+                </button>
+                <button class="nav-tab" onclick="showScreen('rooms')">
+                    <i class="fas fa-bed"></i> Rooms
+                </button>
+                <button class="nav-tab" onclick="showScreen('automation')">
+                    <i class="fas fa-robot"></i> Smart Control & Automation
+                </button>
+                <button class="nav-tab" onclick="showScreen('messaging')">
+                    <i class="fas fa-comments"></i> Support
+                </button>
+                <button class="nav-tab active" onclick="showScreen('billing')">
+                    <i class="fas fa-receipt"></i> Checkout
+                </button>
+                <button class="nav-tab" onclick="showScreen('kiosk')">
+                    <i class="fas fa-credit-card"></i> Kiosk
+                </button>
+            </div>
+            
+            <div class="content">
+                <div class="billing-summary">
+                    <h3 style="margin-bottom: 20px; color: #333;">Billing Summary</h3>
+                    <div class="bill-row">
+                        <span>Room: <span id="bookedRoom">Deluxe Suite</span></span>
+                        <span>2 nights × $200</span>
+                        <span>$400.00</span>
+                    </div>
+                    <div class="bill-row">
+                        <span>Service Charges</span>
+                        <span></span>
+                        <span>$40.00</span>
+                    </div>
+                    <div class="bill-row">
+                        <span>Taxes (10%)</span>
+                        <span></span>
+                        <span>$44.00</span>
+                    </div>
+                    <div class="bill-row">
+                        <span>Total Amount</span>
+                        <span></span>
+                        <span id="totalAmount">$484.00</span>
+                    </div>
+                </div>
+                
+                <h3 style="margin-bottom: 20px; color: #333;">Select Payment Method</h3>
+                <div class="payment-methods">
+                    <div class="payment-card selected" onclick="selectPayment(this)">
+                        <div class="payment-icon">
+                            <i class="fab fa-cc-visa"></i>
+                        </div>
+                        <div>Credit Card</div>
+                    </div>
+                    <div class="payment-card" onclick="selectPayment(this)">
+                        <div class="payment-icon">
+                            <i class="fab fa-paypal"></i>
+                        </div>
+                        <div>PayPal</div>
+                    </div>
+                    <div class="payment-card" onclick="selectPayment(this)">
+                        <div class="payment-icon">
+                            <i class="fab fa-apple-pay"></i>
+                        </div>
+                        <div>Apple Pay</div>
+                    </div>
+                    <div class="payment-card" onclick="selectPayment(this)">
+                        <div class="payment-icon">
+                            <i class="fab fa-google-pay"></i>
+                        </div>
+                        <div>Google Pay</div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn-primary" onclick="processPayment()">
+                        <i class="fas fa-credit-card"></i> Complete Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="screen" id="kiosk-screen">
+            <div class="header">
+                <h1><i class="fas fa-credit-card"></i> Billing Kiosk</h1>
+                <p>Self-service checkout and room management</p>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab" onclick="showScreen('welcome')">
+                    <i class="fas fa-home"></i> Welcome
+                </button>
+                <button class="nav-tab" onclick="showScreen('rooms')">
+                    <i class="fas fa-bed"></i> Rooms
+                </button>
+                <button class="nav-tab" onclick="showScreen('automation')">
+                    <i class="fas fa-robot"></i> Smart Control & Automation
+                </button>
+                <button class="nav-tab" onclick="showScreen('messaging')">
+                    <i class="fas fa-comments"></i> Support
+                </button>
+                <button class="nav-tab" onclick="showScreen('billing')">
+                    <i class="fas fa-receipt"></i> Checkout
+                </button>
+                <button class="nav-tab active" onclick="showScreen('kiosk')">
+                    <i class="fas fa-credit-card"></i> Kiosk
+                </button>
+            </div>
+            
+            <div class="content">
+                <div class="kiosk-container">
+                    <!-- Room Status Header -->
+                    <div class="kiosk-header">
+                        <h3><i class="fas fa-door-open"></i> Room 1205 Status</h3>
+                        <p>Welcome, John Smith • Deluxe Suite</p>
+                    </div>
+                    
+                    <!-- Booking Information -->
+                    <div class="kiosk-section">
+                        <h4 style="margin-bottom: 20px; color: #2c3e50;">
+                            <i class="fas fa-info-circle"></i> Booking Information
+                        </h4>
+                        <div class="booking-info">
+                            <div class="info-card">
+                                <i class="fas fa-calendar-check"></i>
+                                <h4>Check-in</h4>
+                                <p id="kioskCheckinDate">July 15, 2025</p>
+                                <p>3:00 PM</p>
+                            </div>
+                            <div class="info-card">
+                                <i class="fas fa-calendar-times"></i>
+                                <h4>Check-out</h4>
+                                <p id="kioskCheckoutDate">July 17, 2025</p>
+                                <p>11:00 AM</p>
+                            </div>
+                            <div class="info-card">
+                                <i class="fas fa-users"></i>
+                                <h4>Guests</h4>
+                                <p>2 Adults</p>
+                                <p>Standard Occupancy</p>
+                            </div>
+                            <div class="info-card">
+                                <i class="fas fa-bed"></i>
+                                <h4>Room Type</h4>
+                                <p id="kioskRoomType">Deluxe Suite</p>
+                                <p>King Bed</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Time Remaining Status -->
+                    <div class="kiosk-section">
+                        <h4 style="margin-bottom: 20px; color: #2c3e50;">
+                            <i class="fas fa-clock"></i> Stay Status
+                        </h4>
+                        <div class="time-status">
+                            <div>
+                                <h4>Time Remaining</h4>
+                                <div class="time-remaining" id="timeRemaining">18 hours 45 minutes</div>
+                                <p>Until automatic checkout</p>
+                            </div>
+                            <div class="status-indicator active">
+                                <i class="fas fa-check-circle"></i> Room Active
+                            </div>
+                        </div>
+                        
+                        <div class="deactivation-countdown" id="deactivationWarning" style="display: none;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Warning:</strong> Room will be automatically deactivated in <span id="countdownTimer">5:00</span> if checkout is not completed!
+                        </div>
+                    </div>
+                    
+                    <!-- Extend Stay Options -->
+                    <div class="kiosk-section">
+                        <h4 style="margin-bottom: 20px; color: #2c3e50;">
+                            <i class="fas fa-plus-circle"></i> Extend Your Stay
+                        </h4>
+                        <div class="extend-stay">
+                            <button class="extend-btn" onclick="extendStay(1)">
+                                <i class="fas fa-clock"></i> +1 Hour<br>
+                                <small>$25</small>
+                            </button>
+                            <button class="extend-btn" onclick="extendStay(3)">
+                                <i class="fas fa-clock"></i> +3 Hours<br>
+                                <small>$65</small>
+                            </button>
+                            <button class="extend-btn" onclick="extendStay(24)">
+                                <i class="fas fa-calendar-plus"></i> +1 Night<br>
+                                <small id="extendNightPrice">$200</small>
+                            </button>
+                            <button class="extend-btn" onclick="openExtendOptions()">
+                                <i class="fas fa-cog"></i> Custom<br>
+                                <small>Options</small>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Final Bill -->
+                    <div class="kiosk-section">
+                        <h4 style="margin-bottom: 20px; color: #2c3e50;">
+                            <i class="fas fa-receipt"></i> Final Bill
+                        </h4>
+                        <div class="final-bill">
+                            <div class="bill-row">
+                                <span>Room Charges (2 nights)</span>
+                                <span>$400.00</span>
+                            </div>
+                            <div class="bill-row">
+                                <span>Room Service</span>
+                                <span id="roomServiceCharges">$35.00</span>
+                            </div>
+                            <div class="bill-row">
+                                <span>Minibar</span>
+                                <span id="minibarCharges">$12.50</span>
+                            </div>
+                            <div class="bill-row">
+                                <span>Wi-Fi Premium</span>
+                                <span>$0.00</span>
+                            </div>
+                            <div class="bill-row">
+                                <span>Service Charges (10%)</span>
+                                <span id="serviceCharges">$44.75</span>
+                            </div>
+                            <div class="bill-row">
+                                <span>Taxes (10%)</span>
+                                <span id="taxCharges">$49.23</span>
+                            </div>
+                            <div class="bill-row" style="border-top: 2px solid #2c3e50; padding-top: 15px; font-weight: 700; font-size: 1.2rem; color: #2c3e50;">
+                                <span>Total Amount</span>
+                                <span id="kioskTotalAmount">$541.48</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Checkout Actions -->
+                    <div class="kiosk-section">
+                        <div class="checkout-actions">
+                            <button class="action-btn checkout" onclick="processKioskCheckout()">
+                                <i class="fas fa-sign-out-alt"></i> Complete Checkout
+                            </button>
+                            <button class="action-btn" onclick="printReceipt()" style="background: #6f42c1; color: white;">
+                                <i class="fas fa-print"></i> Print Receipt
+                            </button>
+                            <button class="action-btn" onclick="requestHousekeeping()" style="background: #17a2b8; color: white;">
+                                <i class="fas fa-broom"></i> Request Cleaning
+                            </button>
+                            <button class="action-btn emergency" onclick="emergencyCheckout()">
+                                <i class="fas fa-exclamation-triangle"></i> Emergency Checkout
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Room Deactivation Status -->
+                    <div id="deactivationStatus" style="display: none;">
+                        <div class="status-indicator expired">
+                            <i class="fas fa-times-circle"></i> Room Deactivated
+                            <p style="margin: 10px 0 0 0;">This room has been automatically deactivated. Please contact front desk for assistance.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Control Interface -->
+    <button class="voice-control-button" id="voiceButton" onclick="toggleVoiceControl()">
+        <i class="fas fa-microphone" id="voiceIcon"></i>
+    </button>
+    
+    <div class="voice-status" id="voiceStatus">
+        <i class="fas fa-microphone"></i> Listening... Say a command
+    </div>
+    
+    <div class="voice-commands-help" id="voiceHelp">
+        <h4><i class="fas fa-voice"></i> Voice Commands</h4>
+        <ul>
+            <li><span class="command">"Go to rooms"</span><br><span class="description">Navigate to room selection</span></li>
+            <li><span class="command">"Check availability"</span><br><span class="description">View room availability</span></li>
+            <li><span class="command">"Book [room type]"</span><br><span class="description">Book a specific room type</span></li>
+            <li><span class="command">"Make coffee/tea"</span><br><span class="description">AI beverage preparation</span></li>
+            <li><span class="command">"Order food"</span><br><span class="description">Open restaurant menu</span></li>
+            <li><span class="command">"Quick order"</span><br><span class="description">Get chef's recommendation</span></li>
+            <li><span class="command">"Show automation"</span><br><span class="description">Open automation dashboard</span></li>
+            <li><span class="command">"Kiosk"</span><br><span class="description">Open billing kiosk</span></li>
+            <li><span class="command">"Extend stay"</span><br><span class="description">Extend your stay</span></li>
+            <li><span class="command">"Complete checkout"</span><br><span class="description">Process checkout</span></li>
+            <li><span class="command">"Turn on lights"</span><br><span class="description">Enable room lighting</span></li>
+            <li><span class="command">"Set temperature to [number]"</span><br><span class="description">Adjust room temperature</span></li>
+            <li><span class="command">"Turn on TV"</span><br><span class="description">Enable television</span></li>
+            <li><span class="command">"Activate sleep mode"</span><br><span class="description">Start sleep scenario</span></li>
+            <li><span class="command">"Call concierge"</span><br><span class="description">Contact concierge service</span></li>
+            <li><span class="command">"Concierge service"</span><br><span class="description">Request concierge assistance</span></li>
+            <li><span class="command">"Book restaurant"</span><br><span class="description">Restaurant reservations</span></li>
+            <li><span class="command">"Book tickets"</span><br><span class="description">Event and show tickets</span></li>
+            <li><span class="command">"Transportation"</span><br><span class="description">Airport transfer and car service</span></li>
+            <li><span class="command">"Help"</span><br><span class="description">Show voice commands</span></li>
+        </ul>
+    </div>
+
+    <script>
+        let selectedRoom = null;
+        let selectedPrice = 0;
+
+        function showScreen(screenName) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show selected screen
+            document.getElementById(screenName + '-screen').classList.add('active');
+            
+            // Update nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function selectRoom(card, roomName, price) {
+            // Remove selection from all cards
+            document.querySelectorAll('.room-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            
+            // Select current card
+            card.classList.add('selected');
+            selectedRoom = roomName;
+            selectedPrice = price;
+            
+            // Show book button
+            document.getElementById('bookBtn').style.display = 'inline-flex';
+            
+            // Update billing
+            document.getElementById('bookedRoom').textContent = roomName;
+            updateBilling();
+        }
+
+        function bookRoom() {
+            if (selectedRoom) {
+                alert(`Great! You've booked the ${selectedRoom}. Proceeding to smart controls and automation...`);
+                showScreen('automation');
+            }
+        }
+
+        function updateBilling() {
+            if (selectedPrice > 0) {
+                const nights = 2;
+                const roomTotal = selectedPrice * nights;
+                const serviceCharges = roomTotal * 0.1;
+                const taxes = (roomTotal + serviceCharges) * 0.1;
+                const total = roomTotal + serviceCharges + taxes;
+                
+                document.getElementById('totalAmount').textContent = `$${total.toFixed(2)}`;
+            }
+        }
+
+        // Smart Control Functions
+        function updateTemp(value) {
+            document.getElementById('tempValue').textContent = value + '°C';
+        }
+
+        function updateBrightness(value) {
+            document.getElementById('brightnessValue').textContent = value + '%';
+        }
+
+        function updateVolume(value) {
+            document.getElementById('volumeValue').textContent = value + '%';
+        }
+
+        function toggleTV(element) {
+            element.classList.toggle('on');
+            const status = element.classList.contains('on') ? 'ON' : 'OFF';
+            element.nextElementSibling.textContent = status;
+        }
+
+        function toggleAC(element) {
+            element.classList.toggle('on');
+            const status = element.classList.contains('on') ? 'ON' : 'OFF';
+            element.nextElementSibling.textContent = status;
+        }
+
+        function toggleDND(element) {
+            element.classList.toggle('on');
+            const status = element.classList.contains('on') ? 'ON' : 'OFF';
+            element.nextElementSibling.textContent = status;
+        }
+
+        // AI Coffee/Tea Maker Functions
+        function prepareBeverage(beverage) {
+            if (!beverage) return;
+            
+            const statusElement = document.getElementById('beverageStatus');
+            const beverageNames = {
+                'espresso': 'Espresso',
+                'cappuccino': 'Cappuccino',
+                'latte': 'Latte',
+                'americano': 'Americano',
+                'green-tea': 'Green Tea',
+                'black-tea': 'Black Tea',
+                'chai-latte': 'Chai Latte',
+                'hot-chocolate': 'Hot Chocolate'
+            };
+            
+            // Show preparation status
+            statusElement.textContent = 'Preparing...';
+            statusElement.style.color = '#fd7e14';
+            
+            // Simulate AI preparation process
+            setTimeout(() => {
+                statusElement.textContent = `${beverageNames[beverage]} Ready!`;
+                statusElement.style.color = '#28a745';
+                
+                // Show notification
+                alert(`🤖 AI Coffee/Tea Maker: Your ${beverageNames[beverage]} is ready! The perfect temperature and strength have been automatically adjusted based on your preferences.`);
+                
+                // Reset after 10 seconds
+                setTimeout(() => {
+                    statusElement.textContent = 'Ready';
+                    statusElement.style.color = '#333';
+                    document.querySelector('.beverage-selector').value = '';
+                }, 10000);
+            }, 3000);
+        }
+
+        // Restaurant Ordering Functions
+        function openRestaurantMenu() {
+            const menuModal = document.createElement('div');
+            menuModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            menuModal.innerHTML = `
+                <div style="background: white; border-radius: 15px; padding: 30px; max-width: 600px; max-height: 80vh; overflow-y: auto; position: relative;">
+                    <button onclick="this.closest('.modal').remove()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    <h3 style="margin-bottom: 20px; color: #2c3e50; text-align: center;">
+                        <i class="fas fa-utensils"></i> Restaurant Menu
+                    </h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #333; border-bottom: 2px solid #2c3e50; padding-bottom: 5px;">🍽️ Main Courses</h4>
+                        <div class="menu-item" onclick="orderItem('Grilled Salmon', 28)">
+                            <strong>Grilled Salmon</strong> - $28<br>
+                            <small>Fresh Atlantic salmon with herbs and lemon</small>
+                        </div>
+                        <div class="menu-item" onclick="orderItem('Beef Tenderloin', 35)">
+                            <strong>Beef Tenderloin</strong> - $35<br>
+                            <small>Premium cut with mushroom sauce</small>
+                        </div>
+                        <div class="menu-item" onclick="orderItem('Chicken Parmesan', 22)">
+                            <strong>Chicken Parmesan</strong> - $22<br>
+                            <small>Crispy chicken with marinara and mozzarella</small>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 5px;">🍜 Appetizers</h4>
+                        <div class="menu-item" onclick="orderItem('Caesar Salad', 12)">
+                            <strong>Caesar Salad</strong> - $12<br>
+                            <small>Crisp romaine with parmesan and croutons</small>
+                        </div>
+                        <div class="menu-item" onclick="orderItem('Truffle Fries', 14)">
+                            <strong>Truffle Fries</strong> - $14<br>
+                            <small>Hand-cut fries with truffle oil and parmesan</small>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 5px;">🍰 Desserts</h4>
+                        <div class="menu-item" onclick="orderItem('Chocolate Lava Cake', 9)">
+                            <strong>Chocolate Lava Cake</strong> - $9<br>
+                            <small>Warm chocolate cake with vanilla ice cream</small>
+                        </div>
+                        <div class="menu-item" onclick="orderItem('Crème Brûlée', 8)">
+                            <strong>Crème Brûlée</strong> - $8<br>
+                            <small>Classic French dessert with caramelized sugar</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            menuModal.className = 'modal';
+            
+            // Add menu item styling
+            const style = document.createElement('style');
+            style.textContent = `
+                .menu-item {
+                    padding: 10px;
+                    margin: 8px 0;
+                    border: 1px solid #e9ecef;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+                .menu-item:hover {
+                    background: rgba(44, 62, 80, 0.1);
+                    border-color: #2c3e50;
+                    transform: translateY(-2px);
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(menuModal);
+        }
+
+        function orderItem(itemName, price) {
+            const confirmation = confirm(`Order ${itemName} for $${price}?\n\nEstimated delivery: 25-30 minutes`);
+            
+            if (confirmation) {
+                // Update order status
+                const orderStatus = document.getElementById('orderStatus');
+                orderStatus.textContent = `${itemName} - Preparing`;
+                orderStatus.style.color = '#fd7e14';
+                
+                // Close menu modal
+                document.querySelector('.modal').remove();
+                
+                // Show order confirmation
+                alert(`✅ Order Confirmed!\n\n${itemName} - $${price}\nEstimated delivery: 25-30 minutes\n\nYou will receive a notification when your order is ready for delivery.`);
+                
+                // Simulate order preparation
+                setTimeout(() => {
+                    orderStatus.textContent = `${itemName} - Ready!`;
+                    orderStatus.style.color = '#28a745';
+                    alert(`🍽️ Your ${itemName} is ready and being delivered to your room!`);
+                    
+                    // Reset after order delivery
+                    setTimeout(() => {
+                        orderStatus.textContent = 'No Active Orders';
+                        orderStatus.style.color = '#333';
+                    }, 10000);
+                }, 8000);
+            }
+        }
+
+        function quickOrder() {
+            const quickItems = [
+                { name: 'Club Sandwich', price: 16 },
+                { name: 'Margherita Pizza', price: 18 },
+                { name: 'Caesar Salad', price: 12 },
+                { name: 'Pasta Carbonara', price: 20 },
+                { name: 'Fruit Platter', price: 14 }
+            ];
+            
+            const randomItem = quickItems[Math.floor(Math.random() * quickItems.length)];
+            
+            const confirmation = confirm(`🚀 Quick Order Suggestion\n\n${randomItem.name} - $${randomItem.price}\n\nThis is our chef's recommendation based on your preferences and current kitchen availability.\n\nOrder now?`);
+            
+            if (confirmation) {
+                orderItem(randomItem.name, randomItem.price);
+            }
+        }
+
+        // Messaging Functions
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                const chatMessages = document.getElementById('chatMessages');
+                
+                // Add user message
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message user';
+                userMessage.innerHTML = `<div class="message-content">${message}</div>`;
+                chatMessages.appendChild(userMessage);
+                
+                // Auto-reply from staff
+                setTimeout(() => {
+                    const staffMessage = document.createElement('div');
+                    staffMessage.className = 'message staff';
+                    staffMessage.innerHTML = `<div class="message-content">Thank you for your message! I'll help you with that right away.</div>`;
+                    chatMessages.appendChild(staffMessage);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+                
+                input.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Payment Functions
+        function selectPayment(element) {
+            document.querySelectorAll('.payment-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+
+        function processPayment() {
+            alert('Payment processed successfully! Thank you for staying with Luxury Haven Hotel. Have a wonderful day!');
+        }
+
+        // Kiosk Variables
+        let checkoutTime = new Date('2025-07-17T11:00:00'); // Default checkout time
+        let roomActive = true;
+        let kioskTimer;
+        let deactivationTimer;
+        let warningDisplayed = false;
+
+        // Kiosk Functions
+        function initializeKioskTimer() {
+            if (kioskTimer) clearInterval(kioskTimer);
+            
+            kioskTimer = setInterval(() => {
+                updateTimeRemaining();
+                checkDeactivationWarning();
+            }, 1000);
+        }
+
+        function updateTimeRemaining() {
+            if (!roomActive) return;
+            
+            const now = new Date();
+            const timeLeft = checkoutTime.getTime() - now.getTime();
+            
+            if (timeLeft <= 0) {
+                initiateRoomDeactivation();
+                return;
+            }
+            
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            
+            const timeRemainingEl = document.getElementById('timeRemaining');
+            if (timeRemainingEl) {
+                timeRemainingEl.textContent = `${hours} hours ${minutes} minutes`;
+                
+                // Change color based on time remaining
+                if (hours < 1) {
+                    timeRemainingEl.className = 'time-remaining critical';
+                } else if (hours < 3) {
+                    timeRemainingEl.className = 'time-remaining warning';
+                } else {
+                    timeRemainingEl.className = 'time-remaining';
+                }
+            }
+        }
+
+        function checkDeactivationWarning() {
+            const now = new Date();
+            const timeLeft = checkoutTime.getTime() - now.getTime();
+            const fiveMinutes = 5 * 60 * 1000;
+            
+            if (timeLeft <= fiveMinutes && timeLeft > 0 && !warningDisplayed) {
+                showDeactivationWarning();
+                warningDisplayed = true;
+            }
+        }
+
+        function showDeactivationWarning() {
+            const warningEl = document.getElementById('deactivationWarning');
+            if (warningEl) {
+                warningEl.style.display = 'block';
+                startCountdownTimer();
+            }
+            
+            // Show alert
+            alert('⚠️ Warning: Your checkout time is approaching!\n\nYour room will be automatically deactivated in 5 minutes if checkout is not completed.\n\nPlease complete your checkout or extend your stay.');
+        }
+
+        function startCountdownTimer() {
+            let timeLeft = 5 * 60; // 5 minutes in seconds
+            
+            if (deactivationTimer) clearInterval(deactivationTimer);
+            
+            deactivationTimer = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                
+                const countdownEl = document.getElementById('countdownTimer');
+                if (countdownEl) {
+                    countdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+                
+                timeLeft--;
+                
+                if (timeLeft < 0) {
+                    clearInterval(deactivationTimer);
+                    initiateRoomDeactivation();
+                }
+            }, 1000);
+        }
+
+        function initiateRoomDeactivation() {
+            roomActive = false;
+            
+            // Clear timers
+            if (kioskTimer) clearInterval(kioskTimer);
+            if (deactivationTimer) clearInterval(deactivationTimer);
+            
+            // Update UI
+            const statusEl = document.querySelector('.status-indicator');
+            if (statusEl) {
+                statusEl.className = 'status-indicator expired';
+                statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Room Deactivated';
+            }
+            
+            const timeRemainingEl = document.getElementById('timeRemaining');
+            if (timeRemainingEl) {
+                timeRemainingEl.textContent = 'EXPIRED';
+                timeRemainingEl.className = 'time-remaining critical';
+            }
+            
+            // Show deactivation status
+            const deactivationStatusEl = document.getElementById('deactivationStatus');
+            if (deactivationStatusEl) {
+                deactivationStatusEl.style.display = 'block';
+            }
+            
+            // Disable room controls (simulate)
+            disableRoomSystems();
+            
+            // Alert user
+            alert('🚨 Room Deactivated!\n\nYour booking time has expired and the room has been automatically deactivated.\n\nAll room systems have been disabled. Please contact the front desk for assistance.\n\nContact: +1 (555) 123-4567');
+        }
+
+        function disableRoomSystems() {
+            // Simulate disabling room systems
+            console.log('🔒 Room systems disabled:');
+            console.log('- Key card access revoked');
+            console.log('- Smart room controls disabled');
+            console.log('- Wi-Fi access suspended');
+            console.log('- Room service blocked');
+            console.log('- Housekeeping notified for cleaning');
+            
+            // Visual indication in automation screen
+            if (document.querySelector('.automation-scenarios')) {
+                const scenarios = document.querySelectorAll('.scenario-card');
+                scenarios.forEach(card => {
+                    card.style.opacity = '0.5';
+                    card.style.pointerEvents = 'none';
+                    const status = card.querySelector('.scenario-status');
+                    if (status) status.textContent = 'Disabled';
+                });
+            }
+        }
+
+        function extendStay(hours) {
+            if (!roomActive) {
+                alert('Cannot extend stay - room has been deactivated. Please contact front desk.');
+                return;
+            }
+            
+            let cost;
+            let message;
+            
+            if (hours === 1) {
+                cost = 25;
+                message = 'Extend stay by 1 hour for $25?';
+            } else if (hours === 3) {
+                cost = 65;
+                message = 'Extend stay by 3 hours for $65?';
+            } else if (hours === 24) {
+                cost = selectedPrice || 200;
+                message = `Extend stay by 1 night for $${cost}?`;
+            }
+            
+            const confirmed = confirm(`${message}\n\nThis will extend your checkout time and prevent automatic room deactivation.`);
+            
+            if (confirmed) {
+                // Extend checkout time
+                checkoutTime.setTime(checkoutTime.getTime() + (hours * 60 * 60 * 1000));
+                
+                // Reset warning flag
+                warningDisplayed = false;
+                
+                // Hide warning if showing
+                const warningEl = document.getElementById('deactivationWarning');
+                if (warningEl) {
+                    warningEl.style.display = 'none';
+                }
+                
+                // Clear deactivation timer
+                if (deactivationTimer) {
+                    clearInterval(deactivationTimer);
+                }
+                
+                // Update total amount
+                const currentTotal = parseFloat(document.getElementById('kioskTotalAmount').textContent.replace('$', ''));
+                const newTotal = currentTotal + cost;
+                document.getElementById('kioskTotalAmount').textContent = `$${newTotal.toFixed(2)}`;
+                
+                alert(`✅ Stay Extended!\n\nYour checkout time has been extended by ${hours === 24 ? '1 day' : hours + ' hour(s)'}.\n\nNew checkout time: ${checkoutTime.toLocaleString()}\n\nAdditional charge: $${cost}`);
+                
+                updateTimeRemaining();
+            }
+        }
+
+        function openExtendOptions() {
+            const customHours = prompt('Enter number of hours to extend (1-48):');
+            
+            if (customHours && !isNaN(customHours)) {
+                const hours = parseInt(customHours);
+                if (hours >= 1 && hours <= 48) {
+                    const costPerHour = hours <= 12 ? 25 : 20; // Discount for longer stays
+                    const totalCost = hours * costPerHour;
+                    extendStay(hours);
+                } else {
+                    alert('Please enter a valid number of hours between 1 and 48.');
+                }
+            }
+        }
+
+        function processKioskCheckout() {
+            if (!roomActive) {
+                alert('Cannot process checkout - room has been deactivated. Please contact front desk.');
+                return;
+            }
+            
+            const confirmed = confirm('Complete checkout process?\n\nThis will:\n- Process final payment\n- Deactivate room access\n- Prepare room for cleaning\n- Send receipt to your email');
+            
+            if (confirmed) {
+                // Process payment
+                alert('💳 Processing payment...');
+                
+                setTimeout(() => {
+                    // Successful checkout
+                    roomActive = false;
+                    
+                    // Clear timers
+                    if (kioskTimer) clearInterval(kioskTimer);
+                    if (deactivationTimer) clearInterval(deactivationTimer);
+                    
+                    // Update status
+                    const statusEl = document.querySelector('.status-indicator');
+                    if (statusEl) {
+                        statusEl.className = 'status-indicator';
+                        statusEl.style.background = '#d1ecf1';
+                        statusEl.style.color = '#0c5460';
+                        statusEl.innerHTML = '<i class="fas fa-check-circle"></i> Checkout Complete';
+                    }
+                    
+                    alert('✅ Checkout Successful!\n\nThank you for staying with Luxury Haven Hotel!\n\n- Payment processed successfully\n- Receipt sent to your email\n- Room access will expire in 30 minutes\n- Housekeeping has been notified\n\nWe hope to see you again soon!');
+                    
+                    // Auto-redirect to welcome after 30 seconds
+                    setTimeout(() => {
+                        showScreen('welcome');
+                    }, 30000);
+                    
+                }, 2000);
+            }
+        }
+
+        function printReceipt() {
+            alert('🖨️ Printing receipt...\n\nYour detailed receipt is being printed at the kiosk.\n\nIt includes:\n- Room charges breakdown\n- Service charges\n- Payment method\n- Stay summary');
+        }
+
+        function requestHousekeeping() {
+            const services = [
+                'Fresh towels',
+                'Extra pillows', 
+                'Room cleaning',
+                'Minibar restock',
+                'Maintenance request'
+            ];
+            
+            const selected = prompt(`Select housekeeping service:\n\n${services.map((service, index) => `${index + 1}. ${service}`).join('\n')}\n\nEnter number (1-${services.length}):`);
+            
+            if (selected && selected >= 1 && selected <= services.length) {
+                const service = services[selected - 1];
+                alert(`🧹 Housekeeping Request Submitted!\n\nService: ${service}\n\nEstimated arrival: 15-20 minutes\n\nYou will receive a notification when staff is en route to your room.`);
+            }
+        }
+
+        function emergencyCheckout() {
+            const confirmed = confirm('⚠️ Emergency Checkout\n\nThis will immediately:\n- Deactivate room access\n- Alert hotel security\n- Process automatic payment\n- Require front desk assistance\n\nContinue with emergency checkout?');
+            
+            if (confirmed) {
+                roomActive = false;
+                
+                // Clear all timers
+                if (kioskTimer) clearInterval(kioskTimer);
+                if (deactivationTimer) clearInterval(deactivationTimer);
+                
+                alert('🚨 Emergency Checkout Initiated!\n\nHotel security has been notified.\nRoom access deactivated immediately.\nPlease proceed to the front desk.\n\nEmergency Contact: +1 (555) 911-HELP');
+                
+                // Disable all room systems immediately
+                disableRoomSystems();
+            }
+        }
+
+        function updateKioskData() {
+            // Update kiosk data based on selected room and booking details
+            const roomTypeEl = document.getElementById('kioskRoomType');
+            const extendPriceEl = document.getElementById('extendNightPrice');
+            
+            if (selectedRoom && roomTypeEl) {
+                roomTypeEl.textContent = selectedRoom;
+            }
+            
+            if (selectedPrice && extendPriceEl) {
+                extendPriceEl.textContent = `$${selectedPrice}`;
+            }
+            
+            // Set checkout time (tomorrow at 11 AM for demo)
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(11, 0, 0, 0);
+            checkoutTime = tomorrow;
+            
+            // Update initial time display
+            updateTimeRemaining();
+        }
+
+        // Initialize default dates
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dayAfter = new Date(today);
+            dayAfter.setDate(dayAfter.getDate() + 2);
+            
+            document.getElementById('checkin').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('checkout').value = dayAfter.toISOString().split('T')[0];
+            
+            // Initialize voice recognition
+            initializeVoiceControl();
+            
+            // Initialize kiosk timer
+            initializeKioskTimer();
+            
+            // Set initial kiosk data
+            updateKioskData();
+        });
+
+        // Voice Control Variables
+        let recognition;
+        let isListening = false;
+        let voiceControlSupported = false;
+
+        function initializeVoiceControl() {
+            // Check if browser supports speech recognition
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                voiceControlSupported = true;
+                
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                
+                recognition.onstart = function() {
+                    isListening = true;
+                    updateVoiceUI();
+                    showVoiceStatus('Listening... Say a command');
+                };
+                
+                recognition.onresult = function(event) {
+                    const command = event.results[0][0].transcript.toLowerCase();
+                    processVoiceCommand(command);
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Voice recognition error:', event.error);
+                    showVoiceStatus('Voice recognition error. Please try again.');
+                    setTimeout(hideVoiceStatus, 3000);
+                };
+                
+                recognition.onend = function() {
+                    isListening = false;
+                    updateVoiceUI();
+                    hideVoiceStatus();
+                };
+            } else {
+                console.log('Speech recognition not supported');
+                document.getElementById('voiceButton').style.display = 'none';
+            }
+        }
+
+        function toggleVoiceControl() {
+            if (!voiceControlSupported) return;
+            
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        }
+
+        function updateVoiceUI() {
+            const button = document.getElementById('voiceButton');
+            const icon = document.getElementById('voiceIcon');
+            
+            if (isListening) {
+                button.classList.add('listening');
+                icon.className = 'fas fa-stop';
+            } else {
+                button.classList.remove('listening');
+                icon.className = 'fas fa-microphone';
+            }
+        }
+
+        function showVoiceStatus(message) {
+            const status = document.getElementById('voiceStatus');
+            status.textContent = message;
+            status.style.display = 'block';
+        }
+
+        function hideVoiceStatus() {
+            document.getElementById('voiceStatus').style.display = 'none';
+        }
+
+        function showVoiceHelp() {
+            const help = document.getElementById('voiceHelp');
+            help.style.display = 'block';
+            setTimeout(() => {
+                help.style.display = 'none';
+            }, 8000);
+        }
+
+        function processVoiceCommand(command) {
+            showVoiceStatus(`Processing: "${command}"`);
+            
+            // Navigation commands
+            if (command.includes('go to rooms') || command.includes('show rooms') || command.includes('room selection')) {
+                showScreen('rooms');
+                showVoiceStatus('✓ Navigated to room selection');
+            }
+            else if (command.includes('go to welcome') || command.includes('go home') || command.includes('show welcome')) {
+                showScreen('welcome');
+                showVoiceStatus('✓ Navigated to welcome screen');
+            }
+            else if (command.includes('show automation') || command.includes('go to automation') || command.includes('automation hub')) {
+                showScreen('automation');
+                showVoiceStatus('✓ Opened automation dashboard');
+            }
+            else if (command.includes('smart control') || command.includes('room control') || command.includes('show controls')) {
+                showScreen('automation');
+                showVoiceStatus('✓ Opened smart room controls & automation');
+            }
+            else if (command.includes('support') || command.includes('messaging') || command.includes('chat')) {
+                showScreen('messaging');
+                showVoiceStatus('✓ Opened guest support');
+            }
+            else if (command.includes('billing') || command.includes('checkout') || command.includes('payment')) {
+                showScreen('billing');
+                showVoiceStatus('✓ Opened checkout & billing');
+            }
+            
+            // Room control commands
+            else if (command.includes('turn on lights') || command.includes('lights on')) {
+                document.querySelector('#brightnessValue').textContent = '100%';
+                document.querySelector('input[oninput="updateBrightness(this.value)"]').value = 100;
+                showVoiceStatus('✓ Lights turned on');
+            }
+            else if (command.includes('turn off lights') || command.includes('lights off')) {
+                document.querySelector('#brightnessValue').textContent = '0%';
+                document.querySelector('input[oninput="updateBrightness(this.value)"]').value = 0;
+                showVoiceStatus('✓ Lights turned off');
+            }
+            else if (command.includes('dim lights')) {
+                document.querySelector('#brightnessValue').textContent = '30%';
+                document.querySelector('input[oninput="updateBrightness(this.value)"]').value = 30;
+                showVoiceStatus('✓ Lights dimmed');
+            }
+            
+            // Temperature control
+            else if (command.includes('set temperature to')) {
+                const tempMatch = command.match(/set temperature to (\d+)/);
+                if (tempMatch) {
+                    const temp = tempMatch[1];
+                    document.querySelector('#tempValue').textContent = temp + '°C';
+                    document.querySelector('input[oninput="updateTemp(this.value)"]').value = temp;
+                    showVoiceStatus(`✓ Temperature set to ${temp}°C`);
+                } else {
+                    showVoiceStatus('Please specify a temperature (e.g., "set temperature to 22")');
+                }
+            }
+            
+            // TV control
+            else if (command.includes('turn on tv') || command.includes('tv on')) {
+                const tvToggle = document.querySelector('.control-card').querySelectorAll('.toggle-switch')[0];
+                if (!tvToggle.classList.contains('on')) {
+                    toggleTV(tvToggle);
+                }
+                showVoiceStatus('✓ TV turned on');
+            }
+            else if (command.includes('turn off tv') || command.includes('tv off')) {
+                const tvToggle = document.querySelector('.control-card').querySelectorAll('.toggle-switch')[0];
+                if (tvToggle.classList.contains('on')) {
+                    toggleTV(tvToggle);
+                }
+                showVoiceStatus('✓ TV turned off');
+            }
+            
+            // Volume control
+            else if (command.includes('volume up') || command.includes('increase volume')) {
+                const currentVolume = parseInt(document.querySelector('#volumeValue').textContent);
+                const newVolume = Math.min(100, currentVolume + 20);
+                document.querySelector('#volumeValue').textContent = newVolume + '%';
+                document.querySelector('input[oninput="updateVolume(this.value)"]').value = newVolume;
+                showVoiceStatus(`✓ Volume increased to ${newVolume}%`);
+            }
+            else if (command.includes('volume down') || command.includes('decrease volume')) {
+                const currentVolume = parseInt(document.querySelector('#volumeValue').textContent);
+                const newVolume = Math.max(0, currentVolume - 20);
+                document.querySelector('#volumeValue').textContent = newVolume + '%';
+                document.querySelector('input[oninput="updateVolume(this.value)"]').value = newVolume;
+                showVoiceStatus(`✓ Volume decreased to ${newVolume}%`);
+            }
+            
+            // Coffee/Tea AI commands
+            else if (command.includes('make coffee') || command.includes('prepare coffee')) {
+                if (command.includes('espresso')) prepareBeverage('espresso');
+                else if (command.includes('cappuccino')) prepareBeverage('cappuccino');
+                else if (command.includes('latte')) prepareBeverage('latte');
+                else if (command.includes('americano')) prepareBeverage('americano');
+                else prepareBeverage('espresso'); // default
+                showVoiceStatus('✓ AI Coffee maker activated');
+            }
+            else if (command.includes('make tea') || command.includes('prepare tea')) {
+                if (command.includes('green tea') || command.includes('green')) prepareBeverage('green-tea');
+                else if (command.includes('black tea') || command.includes('black')) prepareBeverage('black-tea');
+                else if (command.includes('chai')) prepareBeverage('chai-latte');
+                else prepareBeverage('green-tea'); // default
+                showVoiceStatus('✓ AI Tea maker activated');
+            }
+            else if (command.includes('hot chocolate') || command.includes('chocolate')) {
+                prepareBeverage('hot-chocolate');
+                showVoiceStatus('✓ Hot chocolate being prepared');
+            }
+            
+            // Restaurant ordering commands
+            else if (command.includes('order food') || command.includes('restaurant menu') || command.includes('food menu')) {
+                openRestaurantMenu();
+                showVoiceStatus('✓ Restaurant menu opened');
+            }
+            else if (command.includes('quick order') || command.includes('surprise me') || command.includes('chef recommendation')) {
+                quickOrder();
+                showVoiceStatus('✓ Quick order suggestion ready');
+            }
+            
+            // Automation scenarios
+            else if (command.includes('activate sleep mode') || command.includes('sleep mode') || command.includes('good night')) {
+                if (document.getElementById('automation-screen').classList.contains('active')) {
+                    activateScenario('sleep');
+                } else {
+                    showScreen('automation');
+                    setTimeout(() => activateScenario('sleep'), 500);
+                }
+                showVoiceStatus('✓ Sleep mode activated');
+            }
+            else if (command.includes('good morning') || command.includes('morning mode')) {
+                if (document.getElementById('automation-screen').classList.contains('active')) {
+                    activateScenario('morning');
+                } else {
+                    showScreen('automation');
+                    setTimeout(() => activateScenario('morning'), 500);
+                }
+                showVoiceStatus('✓ Good morning mode activated');
+            }
+            else if (command.includes('start cleaning') || command.includes('clean room') || command.includes('room cleaning')) {
+                if (document.getElementById('automation-screen').classList.contains('active')) {
+                    activateScenario('cleaning');
+                } else {
+                    showScreen('automation');
+                    setTimeout(() => activateScenario('cleaning'), 500);
+                }
+                showVoiceStatus('✓ Room cleaning started');
+            }
+            else if (command.includes('make bed') || command.includes('bed making')) {
+                if (document.getElementById('automation-screen').classList.contains('active')) {
+                    activateScenario('bedmaking');
+                } else {
+                    showScreen('automation');
+                    setTimeout(() => activateScenario('bedmaking'), 500);
+                }
+                showVoiceStatus('✓ Bed making activated');
+            }
+            else if (command.includes('entertainment mode') || command.includes('movie mode')) {
+                if (document.getElementById('automation-screen').classList.contains('active')) {
+                    activateScenario('entertainment');
+                } else {
+                    showScreen('automation');
+                    setTimeout(() => activateScenario('entertainment'), 500);
+                }
+                showVoiceStatus('✓ Entertainment mode activated');
+            }
+            
+            // Room availability commands
+            else if (command.includes('check availability') || command.includes('room availability') || command.includes('available rooms')) {
+                showScreen('rooms');
+                showVoiceStatus('✓ Showing room availability');
+            }
+            else if (command.includes('book') && (command.includes('standard') || command.includes('deluxe') || command.includes('suite') || command.includes('ai room') || command.includes('senior'))) {
+                let roomType = '';
+                if (command.includes('standard')) roomType = 'standard';
+                else if (command.includes('deluxe')) roomType = 'deluxe'; 
+                else if (command.includes('suite')) roomType = 'suite';
+                else if (command.includes('ai room')) roomType = 'ai-room';
+                else if (command.includes('senior')) roomType = 'senior-assisted';
+                
+                if (roomType) {
+                    showScreen('rooms');
+                    setTimeout(() => bookRoom(roomType), 500);
+                }
+            }
+            else if (command.includes('refresh availability') || command.includes('update availability')) {
+                updateRoomAvailability();
+                showVoiceStatus('✓ Room availability updated');
+            }
+            
+            // Kiosk commands
+            else if (command.includes('kiosk') || command.includes('billing kiosk') || command.includes('self checkout')) {
+                showScreen('kiosk');
+                showVoiceStatus('✓ Opened billing kiosk');
+            }
+            else if (command.includes('extend stay') || command.includes('extend my stay')) {
+                if (command.includes('one hour') || command.includes('1 hour')) {
+                    extendStay(1);
+                } else if (command.includes('three hours') || command.includes('3 hours')) {
+                    extendStay(3);
+                } else if (command.includes('one night') || command.includes('1 night')) {
+                    extendStay(24);
+                } else {
+                    openExtendOptions();
+                }
+                showVoiceStatus('✓ Processing stay extension');
+            }
+            else if (command.includes('complete checkout') || command.includes('finish checkout') || command.includes('checkout now')) {
+                processKioskCheckout();
+                showVoiceStatus('✓ Processing checkout');
+            }
+            else if (command.includes('print receipt') || command.includes('get receipt')) {
+                printReceipt();
+                showVoiceStatus('✓ Printing receipt');
+            }
+            else if (command.includes('request cleaning') || command.includes('call housekeeping')) {
+                requestHousekeeping();
+                showVoiceStatus('✓ Housekeeping requested');
+            }
+            else if (command.includes('emergency checkout')) {
+                emergencyCheckout();
+                showVoiceStatus('✓ Emergency checkout initiated');
+            }
+            else if (command.includes('time remaining') || command.includes('checkout time')) {
+                updateTimeRemaining();
+                showVoiceStatus('✓ Updated time remaining');
+            }
+            
+            // Concierge commands
+            else if (command.includes('call concierge') || command.includes('contact concierge') || command.includes('speak to concierge')) {
+                contactConcierge();
+                showVoiceStatus('✓ Connecting to concierge');
+            }
+            else if (command.includes('concierge service') || command.includes('request service') || command.includes('concierge help')) {
+                openConciergeServices();
+                showVoiceStatus('✓ Opening concierge services');
+            }
+            else if (command.includes('book restaurant') || command.includes('restaurant reservation')) {
+                openConciergeServices();
+                setTimeout(() => {
+                    const selection = prompt('Restaurant reservation request.\n\nPreferred restaurant type:\n1. Fine Dining\n2. Casual Dining\n3. International Cuisine\n4. Local Specialties\n\nEnter choice (1-4):');
+                    if (selection) {
+                        alert(`✅ Restaurant reservation request sent!\n\nOur concierge will contact you with available options within 15 minutes.`);
+                    }
+                }, 1000);
+                showVoiceStatus('✓ Restaurant reservation request sent');
+            }
+            else if (command.includes('book tickets') || command.includes('event tickets') || command.includes('show tickets')) {
+                openConciergeServices();
+                setTimeout(() => {
+                    const selection = prompt('Event tickets request.\n\nEvent type:\n1. Theater/Broadway\n2. Concerts\n3. Sports Events\n4. Local Attractions\n\nEnter choice (1-4):');
+                    if (selection) {
+                        alert(`✅ Event tickets request sent!\n\nOur concierge will provide available options shortly.`);
+                    }
+                }, 1000);
+                showVoiceStatus('✓ Event tickets request sent');
+            }
+            else if (command.includes('transportation') || command.includes('airport transfer') || command.includes('taxi')) {
+                openConciergeServices();
+                setTimeout(() => {
+                    const selection = prompt('Transportation request.\n\nService type:\n1. Airport Transfer\n2. City Tour\n3. Car Rental\n4. Private Driver\n\nEnter choice (1-4):');
+                    if (selection) {
+                        alert(`✅ Transportation request sent!\n\nOur concierge will arrange your transportation shortly.`);
+                    }
+                }, 1000);
+                showVoiceStatus('✓ Transportation request sent');
+            }
+            
+            // Help command
+            else if (command.includes('help') || command.includes('commands') || command.includes('what can i say')) {
+                showVoiceHelp();
+                showVoiceStatus('✓ Showing voice commands');
+            }
+            
+            // Unknown command
+            else {
+                showVoiceStatus('Command not recognized. Say "help" for available commands.');
+            }
+            
+            setTimeout(hideVoiceStatus, 3000);
+        }
+
+        // Automation Functions
+        function setAutomation(type) {
+            let message = '';
+            switch(type) {
+                case 'morning':
+                    message = 'Good Morning automation activated! Your room will be prepared for a refreshing start.';
+                    break;
+                case 'night':
+                    message = 'Good Night automation activated! Your room is set for a comfortable sleep.';
+                    break;
+                case 'away':
+                    message = 'Away Mode activated! Your room settings are optimized for energy saving.';
+                    break;
+            }
+            alert(message);
+        }
+
+        function activateScenario(scenario) {
+            let message = '';
+            let details = '';
+            
+            switch(scenario) {
+                case 'arrival':
+                    message = '🏨 Guest Arrival Scenario Activated!';
+                    details = 'Temperature set to 22°C, lights at 80%, welcome music playing, curtains opened to 50%.';
+                    break;
+                case 'morning':
+                    message = '🌅 Good Morning Scenario Activated!';
+                    details = 'Gradual lighting increase, curtains opening, news briefing ready, coffee maker started.';
+                    break;
+                case 'meeting':
+                    message = '💼 Business Mode Activated!';
+                    details = 'Optimal lighting for video calls, Do Not Disturb enabled, productivity apps launched.';
+                    break;
+                case 'sleep':
+                    message = '🌙 Sleep Mode Activated!';
+                    details = 'Lights dimmed to 10%, temperature lowered to 20°C, white noise activated, blackout curtains closed.';
+                    break;
+                case 'away':
+                    message = '🚪 Away Mode Activated!';
+                    details = 'Energy saving enabled, security systems armed, room ready for maintenance access.';
+                    break;
+                case 'entertainment':
+                    message = '🎬 Entertainment Mode Activated!';
+                    details = 'Cinema lighting, surround sound enabled, streaming services ready, ambient mood lighting.';
+                    break;
+                case 'cleaning':
+                    message = '🧹 Automated Room Cleaning Activated!';
+                    details = 'Robotic vacuum deployed, UV sanitization in progress, air purification system activated, estimated completion: 25 minutes.';
+                    break;
+                case 'bedmaking':
+                    message = '🛏️ Automated Bed Making Activated!';
+                    details = 'Robotic bed-making system engaged, fresh linens being applied, pillows arranged, duvet perfectly aligned.';
+                    break;
+                case 'housekeeping':
+                    requestHousekeepingServices();
+                    return; // Return early since we handle this differently
+                case 'coffee':
+                    showBeverageMenu();
+                    return; // Return early since we handle this differently
+                default:
+                    message = 'Automation scenario activated!';
+                    details = 'Room settings optimized for your selected scenario.';
+            }
+            
+            // Show activation feedback
+            alert(message + '\n\n' + details);
+            
+            // Update the scenario card to show it's active
+            event.target.closest('.scenario-card').querySelector('.scenario-status').textContent = 'Active';
+            event.target.closest('.scenario-card').style.background = 'rgba(40, 167, 69, 0.2)';
+            
+            // Reset after 3 seconds for demo purposes
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.scenario-card');
+                cards.forEach(card => {
+                    card.style.background = 'rgba(255,255,255,0.1)';
+                    const status = card.querySelector('.scenario-status');
+                    if (status.textContent === 'Active') {
+                        status.textContent = 'Ready';
+                    }
+                });
+            }, 3000);
+        }
+        
+        // Room Availability Management
+        function updateRoomAvailability() {
+            const availabilityData = {
+                'standard': 8,
+                'deluxe': 5,
+                'suite': 2,
+                'ai-room': 3,
+                'senior-assisted': 4
+            };
+            
+            // Update availability badges
+            const roomCards = document.querySelectorAll('.room-card');
+            roomCards.forEach(card => {
+                const roomType = card.querySelector('.room-title').textContent.toLowerCase().replace(/\s+/g, '-');
+                const badge = card.querySelector('.availability-badge');
+                
+                if (badge && availabilityData[roomType] !== undefined) {
+                    const count = availabilityData[roomType];
+                    badge.textContent = count + ' Available';
+                    
+                    // Apply appropriate styling based on availability
+                    badge.classList.remove('low-stock', 'out-of-stock');
+                    
+                    if (count === 0) {
+                        badge.textContent = 'Sold Out';
+                        badge.classList.add('out-of-stock');
+                    } else if (count <= 2) {
+                        badge.classList.add('low-stock');
+                    }
+                }
+            });
+        }
+        
+        // Simulate booking and update availability
+        function bookRoom(roomType) {
+            // This would typically connect to a backend API
+            // For demo purposes, we'll update locally
+            
+            const roomCards = document.querySelectorAll('.room-card');
+            roomCards.forEach(card => {
+                const cardRoomType = card.querySelector('.room-title').textContent.toLowerCase().replace(/\s+/g, '-');
+                if (cardRoomType === roomType) {
+                    const badge = card.querySelector('.availability-badge');
+                    if (badge && !badge.textContent.includes('Sold Out')) {
+                        let currentCount = parseInt(badge.textContent.match(/\d+/)[0]);
+                        currentCount = Math.max(0, currentCount - 1);
+                        
+                        badge.textContent = currentCount + ' Available';
+                        badge.classList.remove('low-stock', 'out-of-stock');
+                        
+                        if (currentCount === 0) {
+                            badge.textContent = 'Sold Out';
+                            badge.classList.add('out-of-stock');
+                        } else if (currentCount <= 2) {
+                            badge.classList.add('low-stock');
+                        }
+                        
+                        // Show booking confirmation
+                        showVoiceStatus(`✓ Room booked! ${currentCount} rooms remaining`);
+                    }
+                }
+            });
+        }
+        
+        // Initialize availability on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateRoomAvailability();
+            
+            // Add click handlers to room cards for booking simulation
+            const roomCards = document.querySelectorAll('.room-card');
+            roomCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const roomType = this.querySelector('.room-title').textContent.toLowerCase().replace(/\s+/g, '-');
+                    selectRoom(this);
+                    // Uncomment the next line to simulate booking on click
+                    // bookRoom(roomType);
+                });
+            });
+            
+            // Auto-refresh availability every 30 seconds (simulating real-time updates)
+            setInterval(function() {
+                // Simulate random availability changes
+                const roomTypes = ['standard', 'deluxe', 'suite', 'ai-room', 'senior-assisted'];
+                const randomType = roomTypes[Math.floor(Math.random() * roomTypes.length)];
+                
+                // Sometimes decrease availability (simulating bookings)
+                if (Math.random() > 0.7) {
+                    const card = Array.from(document.querySelectorAll('.room-card')).find(card => {
+                        const cardType = card.querySelector('.room-title').textContent.toLowerCase().replace(/\s+/g, '-');
+                        return cardType === randomType;
+                    });
+                    
+                    if (card) {
+                        const badge = card.querySelector('.availability-badge');
+                        if (badge && !badge.textContent.includes('Sold Out')) {
+                            let currentCount = parseInt(badge.textContent.match(/\d+/)[0]);
+                            if (currentCount > 0) {
+                                currentCount--;
+                                badge.textContent = currentCount + ' Available';
+                                badge.classList.remove('low-stock', 'out-of-stock');
+                                
+                                if (currentCount === 0) {
+                                    badge.textContent = 'Sold Out';
+                                    badge.classList.add('out-of-stock');
+                                } else if (currentCount <= 2) {
+                                    badge.classList.add('low-stock');
+                                }
+                            }
+                        }
+                    }
+                }
+            }, 30000); // Update every 30 seconds
+        });
+
+        // Housekeeping Services Function
+        function requestHousekeepingServices() {
+            const services = [
+                'Fresh Bed Linens & Towels',
+                'Minibar Restock',
+                'Room Amenities Refill',
+                'Deep Cleaning Service',
+                'Laundry & Dry Cleaning',
+                'Room Maintenance Check',
+                'Extra Pillows & Blankets',
+                'Bathroom Amenities Restock'
+            ];
+
+            let serviceList = 'Select housekeeping services:\n\n';
+            services.forEach((service, index) => {
+                serviceList += `${index + 1}. ${service}\n`;
+            });
+            serviceList += '\nEnter service numbers (e.g., 1,3,5) or type "all" for complete service:';
+
+            const selection = prompt(serviceList);
+            
+            if (selection === null) return; // User cancelled
+
+            let selectedServices = [];
+            
+            if (selection.toLowerCase() === 'all') {
+                selectedServices = [...services];
+            } else {
+                const numbers = selection.split(',').map(n => parseInt(n.trim()));
+                selectedServices = numbers
+                    .filter(n => n >= 1 && n <= services.length)
+                    .map(n => services[n - 1]);
+            }
+
+            if (selectedServices.length === 0) {
+                alert('❌ No valid services selected.');
+                return;
+            }
+
+            // Show confirmation
+            const confirmMessage = `🏨 Housekeeping Request Confirmed!\n\nRequested Services:\n${selectedServices.map(s => `• ${s}`).join('\n')}\n\nEstimated arrival: 15-20 minutes\nStatus: Request sent to housekeeping team`;
+            
+            alert(confirmMessage);
+
+            // Update the scenario card to show it's active
+            const housekeepingCard = document.querySelector('.scenario-card[onclick="activateScenario(\'housekeeping\')"]');
+            if (housekeepingCard) {
+                const statusElement = housekeepingCard.querySelector('.scenario-status');
+                if (statusElement) {
+                    statusElement.textContent = 'Requested';
+                    statusElement.style.background = '#ffc107';
+                    statusElement.style.color = '#000';
+                }
+                housekeepingCard.style.background = 'rgba(255, 193, 7, 0.2)';
+                
+                // Reset after demonstration
+                setTimeout(() => {
+                    statusElement.textContent = 'Available';
+                    statusElement.style.background = '';
+                    statusElement.style.color = '';
+                    housekeepingCard.style.background = 'rgba(255,255,255,0.1)';
+                }, 5000);
+            }
+        }
+
+        // AI Coffee/Tea Maker Function for Smart Room Automation
+        function showBeverageMenu() {
+            const beverages = [
+                'Espresso - Premium Italian blend',
+                'Cappuccino - Perfect foam art',
+                'Latte - Smooth and creamy',
+                'Americano - Bold and strong',
+                'Green Tea - Organic Japanese matcha',
+                'Black Tea - Earl Grey premium',
+                'Chai Latte - Spiced to perfection',
+                'Hot Chocolate - Rich Belgian cocoa'
+            ];
+
+            let beverageList = '☕ AI Coffee/Tea Maker\nSelect your perfect beverage:\n\n';
+            beverages.forEach((beverage, index) => {
+                beverageList += `${index + 1}. ${beverage}\n`;
+            });
+            beverageList += '\nEnter beverage number (1-8):';
+
+            const selection = prompt(beverageList);
+            
+            if (selection === null) return; // User cancelled
+
+            const beverageIndex = parseInt(selection) - 1;
+            
+            if (beverageIndex < 0 || beverageIndex >= beverages.length) {
+                alert('❌ Invalid selection. Please choose a number between 1-8.');
+                return;
+            }
+
+            const selectedBeverage = beverages[beverageIndex].split(' - ')[0];
+            
+            // Show preparation process
+            const confirmMessage = `🤖 AI Coffee/Tea Maker Activated!\n\nPreparing: ${selectedBeverage}\n\n• Temperature optimized\n• Strength personalized\n• Brewing in progress...\n\nEstimated time: 2-3 minutes`;
+            
+            alert(confirmMessage);
+
+            // Update the scenario card
+            const coffeeCard = document.querySelector('.scenario-card[onclick="activateScenario(\'coffee\')"]');
+            if (coffeeCard) {
+                const statusElement = coffeeCard.querySelector('.scenario-status');
+                if (statusElement) {
+                    statusElement.textContent = 'Preparing...';
+                    statusElement.style.background = '#fd7e14';
+                    statusElement.style.color = '#fff';
+                }
+                coffeeCard.style.background = 'rgba(253, 126, 20, 0.2)';
+                
+                // Show completion after 3 seconds
+                setTimeout(() => {
+                    alert(`☕ Your ${selectedBeverage} is ready!\n\nPerfectly brewed with AI precision. Temperature: 65°C\nEnjoy your beverage!`);
+                    statusElement.textContent = 'Ready';
+                    statusElement.style.background = '';
+                    statusElement.style.color = '';
+                    coffeeCard.style.background = 'rgba(255,255,255,0.1)';
+                }, 3000);
+            }
+        }
+
+        // Quick Meal Ordering Function
+        function orderQuickMeal(mealType) {
+            if (!mealType) return;
+            
+            const statusElement = document.getElementById('mealStatus');
+            const meals = {
+                'breakfast': {
+                    name: 'Quick Breakfast',
+                    price: 18,
+                    items: 'Fresh croissants, seasonal fruit, coffee/tea, orange juice',
+                    time: '15-20 minutes'
+                },
+                'lunch': {
+                    name: 'Quick Lunch',
+                    price: 25,
+                    items: 'Gourmet sandwich, side salad, beverage, dessert',
+                    time: '20-25 minutes'
+                },
+                'dinner': {
+                    name: 'Quick Dinner',
+                    price: 35,
+                    items: 'Chef\'s special, soup/salad, bread, beverage',
+                    time: '25-30 minutes'
+                }
+            };
+
+            const meal = meals[mealType];
+            
+            const confirmMessage = `🍽️ ${meal.name} - $${meal.price}\n\nIncludes:\n${meal.items}\n\nEstimated delivery: ${meal.time}\n\nConfirm order?`;
+            
+            const confirmed = confirm(confirmMessage);
+            
+            if (confirmed) {
+                // Show ordering status
+                statusElement.textContent = 'Ordering...';
+                statusElement.style.color = '#fd7e14';
+                
+                // Simulate ordering process
+                setTimeout(() => {
+                    statusElement.textContent = 'Order Confirmed!';
+                    statusElement.style.color = '#28a745';
+                    
+                    // Show confirmation
+                    alert(`✅ ${meal.name} Order Confirmed!\n\nOrder #${Math.floor(Math.random() * 1000) + 100}\nTotal: $${meal.price}\nDelivery: ${meal.time}\n\nThank you for your order!`);
+                    
+                    // Reset after 10 seconds
+                    setTimeout(() => {
+                        document.querySelector('.meal-selector').value = '';
+                        statusElement.textContent = 'Ready to Order';
+                        statusElement.style.color = '';
+                    }, 10000);
+                }, 2000);
+            } else {
+                // Reset selector if cancelled
+                document.querySelector('.meal-selector').value = '';
+            }
+        }
+
+        // Concierge Services Functions
+        function openConciergeServices() {
+            const services = [
+                'Restaurant Reservations - Book tables at premium restaurants',
+                'Event Tickets - Theater, concerts, sports events',
+                'Transportation - Airport transfers, car rentals, tours',
+                'Shopping Assistance - Personal shopping, delivery services',
+                'Spa & Wellness - Massage appointments, fitness classes',
+                'Business Services - Meeting rooms, printing, secretarial',
+                'Tourist Information - Local attractions, guided tours',
+                'Special Occasions - Birthday celebrations, anniversaries',
+                'Medical Assistance - Doctor appointments, pharmacy',
+                'Emergency Services - Lost items, urgent requests'
+            ];
+
+            let serviceList = '🎩 Concierge Services Available:\n\n';
+            services.forEach((service, index) => {
+                serviceList += `${index + 1}. ${service}\n`;
+            });
+            serviceList += '\nEnter service number (1-10) or type "custom" for special requests:';
+
+            const selection = prompt(serviceList);
+            
+            if (selection === null) return; // User cancelled
+
+            let selectedService = '';
+            let serviceDetails = '';
+
+            if (selection.toLowerCase() === 'custom') {
+                const customRequest = prompt('Please describe your special request:');
+                if (customRequest) {
+                    selectedService = 'Custom Request';
+                    serviceDetails = customRequest;
+                } else {
+                    return;
+                }
+            } else {
+                const serviceIndex = parseInt(selection) - 1;
+                
+                if (serviceIndex < 0 || serviceIndex >= services.length) {
+                    alert('❌ Invalid selection. Please choose a number between 1-10.');
+                    return;
+                }
+                
+                selectedService = services[serviceIndex].split(' - ')[0];
+                serviceDetails = services[serviceIndex].split(' - ')[1] || 'Professional assistance available';
+            }
+
+            // Show confirmation
+            const confirmMessage = `🎩 Concierge Service Request\n\nService: ${selectedService}\nDetails: ${serviceDetails}\n\nOur concierge team will contact you within 15 minutes to assist with your request.\n\nReference: CON${Math.floor(Math.random() * 1000) + 100}\n\nConfirm request?`;
+            
+            const confirmed = confirm(confirmMessage);
+            
+            if (confirmed) {
+                // Update status
+                const statusElement = document.getElementById('conciergeStatus');
+                statusElement.textContent = 'Request Sent';
+                statusElement.style.color = '#28a745';
+                
+                // Show success message
+                alert(`✅ Concierge Request Confirmed!\n\nService: ${selectedService}\nReference: CON${Math.floor(Math.random() * 1000) + 100}\n\nOur concierge team will contact you shortly.\nThank you for choosing our premium services!`);
+                
+                // Reset after 15 seconds
+                setTimeout(() => {
+                    statusElement.textContent = 'Available 24/7';
+                    statusElement.style.color = '';
+                }, 15000);
+            }
+        }
+
+        function contactConcierge() {
+            const contactOptions = [
+                'Direct Phone Call - Speak with concierge immediately',
+                'Video Call - Face-to-face assistance via video',
+                'Priority WhatsApp - Instant messaging service',
+                'Email Request - Detailed written requests',
+                'In-Person Visit - Concierge will visit your room'
+            ];
+
+            let contactList = '📞 Contact Concierge Options:\n\n';
+            contactOptions.forEach((option, index) => {
+                contactList += `${index + 1}. ${option}\n`;
+            });
+            contactList += '\nHow would you like to contact our concierge?';
+
+            const selection = prompt(contactList);
+            
+            if (selection === null) return; // User cancelled
+
+            const contactIndex = parseInt(selection) - 1;
+            
+            if (contactIndex < 0 || contactIndex >= contactOptions.length) {
+                alert('❌ Invalid selection. Please choose a number between 1-5.');
+                return;
+            }
+
+            const selectedContact = contactOptions[contactIndex].split(' - ')[0];
+            const contactDetail = contactOptions[contactIndex].split(' - ')[1];
+
+            // Update status
+            const statusElement = document.getElementById('conciergeStatus');
+            statusElement.textContent = 'Connecting...';
+            statusElement.style.color = '#fd7e14';
+
+            // Simulate connection process
+            setTimeout(() => {
+                let successMessage = '';
+                
+                switch(contactIndex) {
+                    case 0: // Phone Call
+                        successMessage = `📞 Connecting to Concierge...\n\nDirect line: +1-800-LUXURY\nConcierge: Sarah Thompson\nStatus: Available\n\nYou will be connected shortly.`;
+                        break;
+                    case 1: // Video Call
+                        successMessage = `📹 Video Call Initiated\n\nConcierge: Michael Chen\nRoom: 1205\nConnection: Secure\n\nVideo call will start in 30 seconds.`;
+                        break;
+                    case 2: // WhatsApp
+                        successMessage = `💬 WhatsApp Connected\n\nConcierge WhatsApp: +1-800-555-0199\nStatus: Online\nResponse time: < 2 minutes\n\nYou can now chat directly!`;
+                        break;
+                    case 3: // Email
+                        successMessage = `📧 Email Request Form\n\nSend to: concierge@luxuryhaven.com\nSubject: Room 1205 - Service Request\nPriority: High\n\nEmail template opened.`;
+                        break;
+                    case 4: // In-Person
+                        successMessage = `🚪 In-Person Visit Scheduled\n\nConcierge: Emma Rodriguez\nETA: 10-15 minutes\nRoom: 1205\n\nPlease ensure room access is available.`;
+                        break;
+                }
+                
+                alert(`✅ ${selectedContact}\n\n${successMessage}`);
+                
+                statusElement.textContent = 'Connected';
+                statusElement.style.color = '#28a745';
+                
+                // Reset after 20 seconds
+                setTimeout(() => {
+                    statusElement.textContent = 'Available 24/7';
+                    statusElement.style.color = '';
+                }, 20000);
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Security Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+        }
+
+        .screen {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .security-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .security-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .security-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: auto;
+        }
+
+        .status-active { background: #28a745; }
+        .status-warning { background: #ffc107; }
+        .status-danger { background: #dc3545; }
+        .status-offline { background: #6c757d; }
+
+        .security-details {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .security-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .alert-panel {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-panel.active {
+            display: block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .camera-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .camera-feed {
+            background: #000;
+            border-radius: 10px;
+            aspect-ratio: 16/9;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+        }
+
+        .camera-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .access-log {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .log-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-info {
+            flex: 1;
+        }
+
+        .log-time {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .log-action {
+            font-weight: 600;
+        }
+
+        .log-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .log-success { background: #d4edda; color: #155724; }
+        .log-warning { background: #fff3cd; color: #856404; }
+        .log-danger { background: #f8d7da; color: #721c24; }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .emergency-panel {
+            background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .emergency-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .emergency-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .guest-safety-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .safety-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .room-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 5px 0;
+            font-weight: 500;
+        }
+
+        .room-occupied { background: #d1ecf1; color: #0c5460; }
+        .room-vacant { background: #d4edda; color: #155724; }
+        .room-maintenance { background: #fff3cd; color: #856404; }
+        .room-emergency { background: #f8d7da; color: #721c24; }
+
+        .notification-center {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 350px;
+        }
+
+        .notification {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-left: 5px solid;
+            animation: slideInRight 0.5s ease;
+        }
+
+        .notification.success { border-left-color: #28a745; }
+        .notification.warning { border-left-color: #ffc107; }
+        .notification.danger { border-left-color: #dc3545; }
+        .notification.info { border-left-color: #17a2b8; }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .response-team {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .team-member {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .team-member:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+        }
+
+        .member-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+
+        .status-available { background: #28a745; }
+        .status-busy { background: #ffc107; }
+        .status-offline { background: #dc3545; }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .camera-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-shield-alt"></i> Hotel Security Command Center</h1>
+            <p>Advanced Security Management & Monitoring System</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showScreen('dashboard')">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </button>
+            <button class="nav-tab" onclick="showScreen('surveillance')">
+                <i class="fas fa-video"></i> Surveillance
+            </button>
+            <button class="nav-tab" onclick="showScreen('access-control')">
+                <i class="fas fa-key"></i> Access Control
+            </button>
+            <button class="nav-tab" onclick="showScreen('guest-safety')">
+                <i class="fas fa-user-shield"></i> Guest Safety
+            </button>
+            <button class="nav-tab" onclick="showScreen('emergency')">
+                <i class="fas fa-exclamation-triangle"></i> Emergency
+            </button>
+            <button class="nav-tab" onclick="showScreen('reports')">
+                <i class="fas fa-chart-bar"></i> Reports
+            </button>
+        </div>
+
+        <!-- Alert Panel -->
+        <div class="alert-panel" id="alertPanel">
+            <h4><i class="fas fa-exclamation-triangle"></i> Security Alert</h4>
+            <p id="alertMessage">No active alerts</p>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div class="screen active" id="dashboard-screen">
+            <h2 style="margin-bottom: 25px; color: #333;">Security Overview Dashboard</h2>
+            
+            <div class="dashboard-grid">
+                <div class="security-card" onclick="showDetails('surveillance')">
+                    <h3>
+                        <i class="fas fa-video"></i> Surveillance System
+                        <span class="status-indicator status-active"></span>
+                    </h3>
+                    <div class="security-details">
+                        <p>24 cameras online, AI monitoring active</p>
+                        <p>Motion detection enabled in all zones</p>
+                    </div>
+                    <div class="security-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">24/24</div>
+                            <div class="stat-label">Cameras Online</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Alerts Today</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">99.8%</div>
+                            <div class="stat-label">Uptime</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="security-card" onclick="showDetails('access')">
+                    <h3>
+                        <i class="fas fa-key"></i> Access Control
+                        <span class="status-indicator status-active"></span>
+                    </h3>
+                    <div class="security-details">
+                        <p>Digital keycard system operational</p>
+                        <p>Biometric scanners active</p>
+                    </div>
+                    <div class="security-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">156</div>
+                            <div class="stat-label">Access Today</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">2</div>
+                            <div class="stat-label">Denied</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">100%</div>
+                            <div class="stat-label">System Health</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="security-card" onclick="showDetails('fire')">
+                    <h3>
+                        <i class="fas fa-fire-extinguisher"></i> Fire Safety
+                        <span class="status-indicator status-active"></span>
+                    </h3>
+                    <div class="security-details">
+                        <p>Smoke detectors and sprinkler systems</p>
+                        <p>Emergency exits monitored</p>
+                    </div>
+                    <div class="security-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">48</div>
+                            <div class="stat-label">Detectors</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Alarms</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">Last Check</div>
+                            <div class="stat-label">2 days ago</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="security-card" onclick="showDetails('intrusion')">
+                    <h3>
+                        <i class="fas fa-shield-alt"></i> Intrusion Detection
+                        <span class="status-indicator status-active"></span>
+                    </h3>
+                    <div class="security-details">
+                        <p>Perimeter sensors and alarms</p>
+                        <p>AI-powered threat detection</p>
+                    </div>
+                    <div class="security-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">32</div>
+                            <div class="stat-label">Sensors</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Breaches</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">Real-time</div>
+                            <div class="stat-label">Monitoring</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="security-card" onclick="showDetails('guest-safety')">
+                    <h3>
+                        <i class="fas fa-user-shield"></i> Guest Safety
+                        <span class="status-indicator status-active"></span>
+                    </h3>
+                    <div class="security-details">
+                        <p>Emergency buttons in all rooms</p>
+                        <p>24/7 security patrol active</p>
+                    </div>
+                    <div class="security-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">128</div>
+                            <div class="stat-label">Rooms Monitored</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Emergency Calls</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">4</div>
+                            <div class="stat-label">Guards on Duty</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="security-card" onclick="showDetails('cyber')">
+                    <h3>
+                        <i class="fas fa-laptop-code"></i> Cybersecurity
+                        <span class="status-indicator status-warning"></span>
+                    </h3>
+                    <div class="security-details">
+                        <p>Network security and data protection</p>
+                        <p>Firewall and intrusion prevention</p>
+                    </div>
+                    <div class="security-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">5</div>
+                            <div class="stat-label">Threats Blocked</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">99.9%</div>
+                            <div class="stat-label">Network Uptime</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">Active</div>
+                            <div class="stat-label">Firewall</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <button class="control-btn btn-primary" onclick="lockdownMode()">
+                    <i class="fas fa-lock"></i> Emergency Lockdown
+                </button>
+                <button class="control-btn btn-success" onclick="testSystems()">
+                    <i class="fas fa-check-circle"></i> Test All Systems
+                </button>
+                <button class="control-btn btn-warning" onclick="maintenanceMode()">
+                    <i class="fas fa-tools"></i> Maintenance Mode
+                </button>
+                <button class="control-btn btn-danger" onclick="triggerAlarm()">
+                    <i class="fas fa-bell"></i> Trigger Alarm
+                </button>
+            </div>
+        </div>
+
+        <!-- Surveillance Screen -->
+        <div class="screen" id="surveillance-screen">
+            <h2 style="margin-bottom: 25px; color: #333;">Surveillance Monitoring</h2>
+            
+            <div class="camera-grid">
+                <div class="camera-feed" onclick="viewFullscreen('lobby')">
+                    <div class="camera-overlay">Lobby - Main Entrance</div>
+                    <div class="camera-status status-active"></div>
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 2rem;">
+                        <i class="fas fa-video"></i>
+                    </div>
+                </div>
+                
+                <div class="camera-feed" onclick="viewFullscreen('parking')">
+                    <div class="camera-overlay">Parking Garage - Level 1</div>
+                    <div class="camera-status status-active"></div>
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 2rem;">
+                        <i class="fas fa-video"></i>
+                    </div>
+                </div>
+                
+                <div class="camera-feed" onclick="viewFullscreen('elevator')">
+                    <div class="camera-overlay">Elevator Bank - Floor 1-5</div>
+                    <div class="camera-status status-active"></div>
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 2rem;">
+                        <i class="fas fa-video"></i>
+                    </div>
+                </div>
+                
+                <div class="camera-feed" onclick="viewFullscreen('hallway')">
+                    <div class="camera-overlay">Hallway - Floor 3</div>
+                    <div class="camera-status status-active"></div>
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 2rem;">
+                        <i class="fas fa-video"></i>
+                    </div>
+                </div>
+                
+                <div class="camera-feed" onclick="viewFullscreen('exit')">
+                    <div class="camera-overlay">Emergency Exit - North</div>
+                    <div class="camera-status status-active"></div>
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 2rem;">
+                        <i class="fas fa-video"></i>
+                    </div>
+                </div>
+                
+                <div class="camera-feed" onclick="viewFullscreen('pool')">
+                    <div class="camera-overlay">Pool Area - Outdoor</div>
+                    <div class="camera-status status-active"></div>
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 2rem;">
+                        <i class="fas fa-video"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3>AI Detection Alerts</h3>
+                <div class="access-log">
+                    <div class="log-entry">
+                        <div class="log-info">
+                            <div class="log-action">Motion detected in parking garage</div>
+                            <div class="log-time">15:42 - Camera 07</div>
+                        </div>
+                        <span class="log-status log-success">Normal</span>
+                    </div>
+                    <div class="log-entry">
+                        <div class="log-info">
+                            <div class="log-action">Person loitering detected - lobby area</div>
+                            <div class="log-time">14:28 - Camera 01</div>
+                        </div>
+                        <span class="log-status log-warning">Review</span>
+                    </div>
+                    <div class="log-entry">
+                        <div class="log-info">
+                            <div class="log-action">Facial recognition - VIP guest arrival</div>
+                            <div class="log-time">13:15 - Camera 01</div>
+                        </div>
+                        <span class="log-status log-success">Verified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Access Control Screen -->
+        <div class="screen" id="access-control-screen">
+            <h2 style="margin-bottom: 25px; color: #333;">Access Control System</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+                <div>
+                    <h3>Recent Access Log</h3>
+                    <div class="access-log">
+                        <div class="log-entry">
+                            <div class="log-info">
+                                <div class="log-action">John Smith - Room 305</div>
+                                <div class="log-time">16:23 - Keycard Access</div>
+                            </div>
+                            <span class="log-status log-success">Granted</span>
+                        </div>
+                        <div class="log-entry">
+                            <div class="log-info">
+                                <div class="log-action">Staff - Maria Garcia - Maintenance</div>
+                                <div class="log-time">16:15 - Biometric Scan</div>
+                            </div>
+                            <span class="log-status log-success">Granted</span>
+                        </div>
+                        <div class="log-entry">
+                            <div class="log-info">
+                                <div class="log-action">Unknown Card - Staff Entrance</div>
+                                <div class="log-time">15:58 - Invalid Keycard</div>
+                            </div>
+                            <span class="log-status log-danger">Denied</span>
+                        </div>
+                        <div class="log-entry">
+                            <div class="log-info">
+                                <div class="log-action">Guest - Sarah Johnson - Pool Area</div>
+                                <div class="log-time">15:45 - Keycard Access</div>
+                            </div>
+                            <span class="log-status log-success">Granted</span>
+                        </div>
+                        <div class="log-entry">
+                            <div class="log-info">
+                                <div class="log-action">Security - David Chen - Patrol</div>
+                                <div class="log-time">15:30 - Master Key</div>
+                            </div>
+                            <span class="log-status log-success">Granted</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>Access Control Points</h3>
+                    <div class="security-card">
+                        <h4><i class="fas fa-door-open"></i> Main Entrance</h4>
+                        <p>Status: <span style="color: #28a745; font-weight: 600;">Secured</span></p>
+                        <p>Last Access: 16:23</p>
+                        <button class="control-btn btn-warning" onclick="toggleAccess('main')">
+                            <i class="fas fa-lock-open"></i> Unlock Temporarily
+                        </button>
+                    </div>
+                    
+                    <div class="security-card" style="margin-top: 15px;">
+                        <h4><i class="fas fa-car"></i> Parking Garage</h4>
+                        <p>Status: <span style="color: #28a745; font-weight: 600;">Secured</span></p>
+                        <p>Last Access: 16:15</p>
+                        <button class="control-btn btn-warning" onclick="toggleAccess('parking')">
+                            <i class="fas fa-lock-open"></i> Unlock Temporarily
+                        </button>
+                    </div>
+                    
+                    <div class="security-card" style="margin-top: 15px;">
+                        <h4><i class="fas fa-swimming-pool"></i> Pool Area</h4>
+                        <p>Status: <span style="color: #ffc107; font-weight: 600;">Open Hours</span></p>
+                        <p>Last Access: 15:45</p>
+                        <button class="control-btn btn-danger" onclick="toggleAccess('pool')">
+                            <i class="fas fa-lock"></i> Lock Immediately
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <button class="control-btn btn-primary" onclick="generateGuestCard()">
+                    <i class="fas fa-credit-card"></i> Generate Guest Card
+                </button>
+                <button class="control-btn btn-success" onclick="activateStaffAccess()">
+                    <i class="fas fa-user-tie"></i> Staff Access Override
+                </button>
+                <button class="control-btn btn-warning" onclick="revokeAccess()">
+                    <i class="fas fa-user-times"></i> Revoke Access
+                </button>
+                <button class="control-btn btn-danger" onclick="emergencyLockdown()">
+                    <i class="fas fa-exclamation-triangle"></i> Emergency Lockdown
+                </button>
+            </div>
+        </div>
+
+        <!-- Guest Safety Screen -->
+        <div class="screen" id="guest-safety-screen">
+            <h2 style="margin-bottom: 25px; color: #333;">Guest Safety Monitoring</h2>
+            
+            <div class="guest-safety-grid">
+                <div class="safety-card">
+                    <h3><i class="fas fa-hotel"></i> Room Status Overview</h3>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <div class="room-status room-occupied">
+                            <span>Room 101 - John & Mary Smith</span>
+                            <span><i class="fas fa-check-circle"></i> Safe</span>
+                        </div>
+                        <div class="room-status room-vacant">
+                            <span>Room 102 - Vacant</span>
+                            <span><i class="fas fa-door-open"></i> Clean</span>
+                        </div>
+                        <div class="room-status room-occupied">
+                            <span>Room 103 - Sarah Johnson</span>
+                            <span><i class="fas fa-check-circle"></i> Safe</span>
+                        </div>
+                        <div class="room-status room-maintenance">
+                            <span>Room 104 - Maintenance</span>
+                            <span><i class="fas fa-tools"></i> In Progress</span>
+                        </div>
+                        <div class="room-status room-occupied">
+                            <span>Room 105 - David Wilson</span>
+                            <span><i class="fas fa-check-circle"></i> Safe</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="safety-card">
+                    <h3><i class="fas fa-shield-alt"></i> Security Patrol</h3>
+                    <div class="response-team">
+                        <div class="team-member">
+                            <h4>Guard 1 - Alex Chen</h4>
+                            <p>Floor 1-3 Patrol</p>
+                            <span class="member-status status-available"></span>
+                            <span>Available</span>
+                        </div>
+                        <div class="team-member">
+                            <h4>Guard 2 - Maria Lopez</h4>
+                            <p>Floor 4-6 Patrol</p>
+                            <span class="member-status status-available"></span>
+                            <span>Available</span>
+                        </div>
+                        <div class="team-member">
+                            <h4>Guard 3 - James Wilson</h4>
+                            <p>Lobby & Entrance</p>
+                            <span class="member-status status-busy"></span>
+                            <span>On Call</span>
+                        </div>
+                        <div class="team-member">
+                            <h4>Guard 4 - Lisa Zhang</h4>
+                            <p>Perimeter Patrol</p>
+                            <span class="member-status status-available"></span>
+                            <span>Available</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3>Emergency Response Capabilities</h3>
+                <div class="dashboard-grid">
+                    <div class="security-card">
+                        <h4><i class="fas fa-ambulance"></i> Medical Emergency</h4>
+                        <p>Trained first aid responders on duty</p>
+                        <p>Direct line to emergency services</p>
+                        <button class="control-btn btn-danger" onclick="medicalEmergency()">
+                            <i class="fas fa-phone"></i> Call Medical Emergency
+                        </button>
+                    </div>
+                    
+                    <div class="security-card">
+                        <h4><i class="fas fa-fire"></i> Fire Emergency</h4>
+                        <p>Automatic fire detection and suppression</p>
+                        <p>Evacuation procedures activated</p>
+                        <button class="control-btn btn-danger" onclick="fireEmergency()">
+                            <i class="fas fa-fire-extinguisher"></i> Fire Emergency Protocol
+                        </button>
+                    </div>
+                    
+                    <div class="security-card">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Security Threat</h4>
+                        <p>Immediate response team deployment</p>
+                        <p>Law enforcement notification</p>
+                        <button class="control-btn btn-danger" onclick="securityThreat()">
+                            <i class="fas fa-shield-alt"></i> Security Response
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Screen -->
+        <div class="screen" id="emergency-screen">
+            <h2 style="margin-bottom: 25px; color: #333;">Emergency Response Center</h2>
+            
+            <div class="emergency-panel">
+                <h3><i class="fas fa-exclamation-circle"></i> Emergency Actions</h3>
+                <p style="margin-bottom: 20px;">Select appropriate emergency response protocol</p>
+                
+                <button class="emergency-btn" onclick="evacuationProcedure()">
+                    <i class="fas fa-running"></i> Building Evacuation
+                </button>
+                <button class="emergency-btn" onclick="lockdownProcedure()">
+                    <i class="fas fa-lock"></i> Security Lockdown
+                </button>
+                <button class="emergency-btn" onclick="fireProcedure()">
+                    <i class="fas fa-fire-extinguisher"></i> Fire Emergency
+                </button>
+                <button class="emergency-btn" onclick="medicalProcedure()">
+                    <i class="fas fa-ambulance"></i> Medical Emergency
+                </button>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3>Emergency Contacts</h3>
+                <div class="dashboard-grid">
+                    <div class="security-card">
+                        <h4><i class="fas fa-phone"></i> Emergency Services</h4>
+                        <p><strong>Fire Department:</strong> 911</p>
+                        <p><strong>Police:</strong> 911</p>
+                        <p><strong>Medical:</strong> 911</p>
+                        <p><strong>Poison Control:</strong> 1-800-222-1222</p>
+                    </div>
+                    
+                    <div class="security-card">
+                        <h4><i class="fas fa-hospital"></i> Local Hospitals</h4>
+                        <p><strong>City General Hospital:</strong> (555) 123-4567</p>
+                        <p><strong>Emergency Room:</strong> (555) 123-4568</p>
+                        <p><strong>Distance:</strong> 2.5 miles</p>
+                    </div>
+                    
+                    <div class="security-card">
+                        <h4><i class="fas fa-building"></i> Hotel Management</h4>
+                        <p><strong>General Manager:</strong> (555) 100-0001</p>
+                        <p><strong>Security Chief:</strong> (555) 100-0002</p>
+                        <p><strong>Maintenance:</strong> (555) 100-0003</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Screen -->
+        <div class="screen" id="reports-screen">
+            <h2 style="margin-bottom: 25px; color: #333;">Security Reports & Analytics</h2>
+            
+            <div class="dashboard-grid">
+                <div class="security-card">
+                    <h3><i class="fas fa-chart-line"></i> Daily Security Summary</h3>
+                    <div class="security-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">156</div>
+                            <div class="stat-label">Total Access Events</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">2</div>
+                            <div class="stat-label">Access Denied</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Security Incidents</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="security-card">
+                    <h3><i class="fas fa-video"></i> Surveillance Analytics</h3>
+                    <div class="security-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">24</div>
+                            <div class="stat-label">Cameras Active</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">1,247</div>
+                            <div class="stat-label">Events Recorded</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">99.8%</div>
+                            <div class="stat-label">System Uptime</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="security-card">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Incident Reports</h3>
+                    <div class="security-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Critical Incidents</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">1</div>
+                            <div class="stat-label">Minor Incidents</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">100%</div>
+                            <div class="stat-label">Response Rate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3>Generate Reports</h3>
+                <div class="control-panel">
+                    <button class="control-btn btn-primary" onclick="generateReport('daily')">
+                        <i class="fas fa-calendar-day"></i> Daily Report
+                    </button>
+                    <button class="control-btn btn-primary" onclick="generateReport('weekly')">
+                        <i class="fas fa-calendar-week"></i> Weekly Report
+                    </button>
+                    <button class="control-btn btn-primary" onclick="generateReport('monthly')">
+                        <i class="fas fa-calendar-alt"></i> Monthly Report
+                    </button>
+                    <button class="control-btn btn-success" onclick="exportReport()">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Center -->
+    <div class="notification-center" id="notificationCenter"></div>
+
+    <script>
+        // Global variables
+        let alertActive = false;
+        let systemStatus = {
+            surveillance: 'active',
+            access: 'active',
+            fire: 'active',
+            intrusion: 'active',
+            guest: 'active',
+            cyber: 'warning'
+        };
+
+        // Screen navigation
+        function showScreen(screenName) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show selected screen
+            document.getElementById(screenName + '-screen').classList.add('active');
+            
+            // Update nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Show detailed information
+        function showDetails(system) {
+            switch(system) {
+                case 'surveillance':
+                    showScreen('surveillance');
+                    break;
+                case 'access':
+                    showScreen('access-control');
+                    break;
+                case 'guest-safety':
+                    showScreen('guest-safety');
+                    break;
+                default:
+                    showNotification(`${system} details displayed`, 'info');
+            }
+        }
+
+        // Dashboard control functions
+        function lockdownMode() {
+            showNotification('Emergency lockdown activated - All access points secured', 'warning');
+            triggerAlert('Emergency Lockdown Activated - All access points have been secured');
+        }
+
+        function testSystems() {
+            showNotification('System test initiated - All security systems being verified', 'info');
+            setTimeout(() => {
+                showNotification('System test completed - All systems operational', 'success');
+            }, 3000);
+        }
+
+        function maintenanceMode() {
+            showNotification('Maintenance mode activated - Non-critical systems temporarily offline', 'warning');
+        }
+
+        function triggerAlarm() {
+            if (confirm('Are you sure you want to trigger the security alarm?')) {
+                triggerAlert('Security Alarm Activated - All security personnel notified');
+                showNotification('Security alarm triggered - Emergency response activated', 'danger');
+            }
+        }
+
+        // Surveillance functions
+        function viewFullscreen(camera) {
+            showNotification(`Viewing ${camera} camera in fullscreen mode`, 'info');
+        }
+
+        // Access control functions
+        function toggleAccess(location) {
+            showNotification(`Access control toggled for ${location}`, 'warning');
+        }
+
+        function generateGuestCard() {
+            const cardNumber = Math.random().toString(36).substr(2, 8).toUpperCase();
+            showNotification(`Guest keycard generated: ${cardNumber}`, 'success');
+        }
+
+        function activateStaffAccess() {
+            showNotification('Staff access override activated', 'warning');
+        }
+
+        function revokeAccess() {
+            showNotification('Access revoked for selected user', 'warning');
+        }
+
+        function emergencyLockdown() {
+            if (confirm('Activate emergency lockdown? This will secure all access points immediately.')) {
+                triggerAlert('Emergency Lockdown - All access points secured');
+                showNotification('Emergency lockdown activated', 'danger');
+            }
+        }
+
+        // Guest safety functions
+        function medicalEmergency() {
+            if (confirm('Call medical emergency services?')) {
+                triggerAlert('Medical Emergency - Emergency services contacted');
+                showNotification('Medical emergency protocol activated', 'danger');
+            }
+        }
+
+        function fireEmergency() {
+            if (confirm('Activate fire emergency protocol?')) {
+                triggerAlert('Fire Emergency - Evacuation procedures activated');
+                showNotification('Fire emergency protocol activated', 'danger');
+            }
+        }
+
+        function securityThreat() {
+            if (confirm('Activate security threat response?')) {
+                triggerAlert('Security Threat - Response team deployed');
+                showNotification('Security threat response activated', 'danger');
+            }
+        }
+
+        // Emergency procedures
+        function evacuationProcedure() {
+            if (confirm('Initiate building evacuation?')) {
+                triggerAlert('Building Evacuation - All guests and staff must evacuate immediately');
+                showNotification('Building evacuation initiated', 'danger');
+            }
+        }
+
+        function lockdownProcedure() {
+            if (confirm('Initiate security lockdown?')) {
+                triggerAlert('Security Lockdown - Building secured, no entry or exit permitted');
+                showNotification('Security lockdown initiated', 'danger');
+            }
+        }
+
+        function fireProcedure() {
+            if (confirm('Activate fire emergency protocol?')) {
+                triggerAlert('Fire Emergency - Sprinkler systems activated, evacuation in progress');
+                showNotification('Fire emergency protocol activated', 'danger');
+            }
+        }
+
+        function medicalProcedure() {
+            if (confirm('Activate medical emergency protocol?')) {
+                triggerAlert('Medical Emergency - Emergency medical services en route');
+                showNotification('Medical emergency protocol activated', 'danger');
+            }
+        }
+
+        // Reports functions
+        function generateReport(type) {
+            showNotification(`Generating ${type} security report...`, 'info');
+            setTimeout(() => {
+                showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} report generated successfully`, 'success');
+            }, 2000);
+        }
+
+        function exportReport() {
+            showNotification('Exporting security data...', 'info');
+            setTimeout(() => {
+                showNotification('Security data exported successfully', 'success');
+            }, 1500);
+        }
+
+        // Alert system
+        function triggerAlert(message) {
+            const alertPanel = document.getElementById('alertPanel');
+            const alertMessage = document.getElementById('alertMessage');
+            
+            alertMessage.textContent = message;
+            alertPanel.classList.add('active');
+            alertActive = true;
+            
+            // Auto-hide alert after 10 seconds
+            setTimeout(() => {
+                alertPanel.classList.remove('active');
+                alertActive = false;
+            }, 10000);
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notificationCenter = document.getElementById('notificationCenter');
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            let icon = 'fas fa-info-circle';
+            switch(type) {
+                case 'success': icon = 'fas fa-check-circle'; break;
+                case 'warning': icon = 'fas fa-exclamation-triangle'; break;
+                case 'danger': icon = 'fas fa-times-circle'; break;
+            }
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="${icon}"></i>
+                    <span>${message}</span>
+                </div>
+                <small style="color: #666;">${new Date().toLocaleTimeString()}</small>
+            `;
+            
+            notificationCenter.appendChild(notification);
+            
+            // Auto-remove notification after 5 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Initialize system
+        document.addEventListener('DOMContentLoaded', function() {
+            showNotification('Hotel Security System Online', 'success');
+            
+            // Simulate periodic security updates
+            setInterval(() => {
+                const updates = [
+                    'Routine security patrol completed',
+                    'Camera system health check passed',
+                    'Access control system synchronized',
+                    'Fire safety systems tested - OK'
+                ];
+                
+                const randomUpdate = updates[Math.floor(Math.random() * updates.length)];
+                if (Math.random() < 0.3) { // 30% chance of update every 30 seconds
+                    showNotification(randomUpdate, 'info');
+                }
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
