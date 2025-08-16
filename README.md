@@ -15,6 +15,7 @@ This project combines HTML, CSS, and JavaScript with advanced animations and int
 Presentation : 
 [View the PowerPoint presentation](./Skydrop.pptx)
 
+Prototype : https://karunyadhana6.github.io/Taskmanager1/drone_delivery.html
 
 Project 2 : QuantumNest- Smart hotel system prepared for Human Centered Artificial Intelligence
 
