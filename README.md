@@ -14,3 +14,26 @@ This project combines HTML, CSS, and JavaScript with advanced animations and int
 
 Presentation : 
 [View the PowerPoint presentation](./Skydrop.pptx)
+
+
+Project 2 : QuantumNest- Smart hotel system prepared for Human Centered Artificial Intelligence
+
+Interactive Hotel Management System prototype! 🏨✨
+It streamlines hotel operations with:
+
+📅 Automated booking & room allocation
+
+🧾 Billing & payment integration
+
+📊 Dashboard for occupancy, revenue, and service tracking
+
+🛎 Service request & task management for staff
+
+🌐 User-friendly web interface for both admin and guests
+
+This project demonstrates end-to-end digital transformation for hospitality — enhancing efficiency, guest satisfaction, and operational transparency.
+
+Prototype: 
+Hotel_management : https://karunyadhana6.github.io/Taskmanager1/Hotel_management.html
+
+Security system: https://karunyadhana6.github.io/Taskmanager1/Security_hotel.html
